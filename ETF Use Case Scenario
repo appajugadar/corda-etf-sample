@@ -1,0 +1,22 @@
+AP Node
+1. Self issue cash
+2. Self issue etf
+3. Buy ETF
+4. Sell ETF
+5. Transact buy/sell with agent
+
+AP agent Node
+1. View AP's ledger for cash/etf
+2. Transact buy/sell with AP
+3. Transact buy/sell with ETF Custodian
+
+
+Custodian Node
+1. Transact buy/sell with AP agent
+2. Validate basket
+3. Notify Transfer Agent and sponserer
+
+ 
+TA+DTCC Node
+1. Transact with custodian
+2. Transact with AP to deposit ETF
