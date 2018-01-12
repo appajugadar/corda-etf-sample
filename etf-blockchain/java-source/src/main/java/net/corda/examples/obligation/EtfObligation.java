@@ -41,14 +41,6 @@ public class EtfObligation implements LinearState {
     }
 
 
-    public EtfObligation(EtfAsset etfAsset, AbstractParty lender, AbstractParty borrower, Amount<Currency> amount, UniqueIdentifier linearId) {
-        this.etfAsset = etfAsset;
-        this.amount = null;
-        this.lender = lender;
-        this.borrower = borrower;
-        this.linearId = linearId;
-    }
-
     public EtfObligation(EtfAsset eftAsset, AbstractParty lender, AbstractParty borrower, Amount<Currency> amount) {
         this.etfAsset = eftAsset;
         this.amount = amount;

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.corda.confidential.SwapIdentitiesFlow;
 import net.corda.core.contracts.Amount;
+import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.flows.*;
 import net.corda.core.identity.AnonymousParty;
 import net.corda.core.identity.Party;
@@ -13,6 +14,8 @@ import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.ProgressTracker.Step;
 
+import net.corda.examples.obligation.EtfAsset;
+import net.corda.examples.obligation.EtfObligation;
 import net.corda.examples.obligation.Obligation;
 import net.corda.examples.obligation.ObligationContract;
 import net.corda.examples.obligation.flows.ObligationBaseFlow;
@@ -29,8 +32,8 @@ public class EtfIssueObligation {
     @InitiatingFlow
     @StartableByRPC
     public static class Initiator extends ObligationBaseFlow {
-        private final Amount<Currency> amount;
-        private final EtfAsset etfAsset;
+        private final Amount<Currency> amount;;
+        private final EtfAsset etfAsset;;
         private final Party lender;
         private final Boolean anonymous;
         private final Boolean isCash;
@@ -56,6 +59,7 @@ public class EtfIssueObligation {
 
         public Initiator(Amount<Currency> amount, Party lender, Boolean anonymous) {
             this.amount = amount;
+            this.etfAsset = null;
             this.isCash= true;
             this.lender = lender;
             this.anonymous = anonymous;
@@ -63,6 +67,7 @@ public class EtfIssueObligation {
 
         public Initiator(EtfAsset etfAsset, Party lender, Boolean anonymous) {
             this.etfAsset = etfAsset;
+            this.amount = null;
             this.isCash = false;
             this.lender = lender;
             this.anonymous = anonymous;
@@ -126,16 +131,16 @@ public class EtfIssueObligation {
                 final AnonymousParty anonymousLender = txKeys.get(lender);
 
                 if(isCash){
-                    return new EtfObligation(amount, anonymousLender, anonymousMe);
+                    return new EtfObligation(amount, anonymousLender, anonymousMe, null);
                 }else{
-                    return new EtfObligation(etfAsset, anonymousLender, anonymousMe);
+                    return new EtfObligation(etfAsset, anonymousLender, anonymousMe, new UniqueIdentifier());
                 }
 
             } else {
                 if(isCash){
-                    return new EtfObligation(amount, anonymousLender, anonymousMe);
+                    return new EtfObligation(amount, lender ,getOurIdentity(), null);
                 }else{
-                    return new EtfObligation(etfAsset, anonymousLender, anonymousMe);
+                    return new EtfObligation(etfAsset, lender ,getOurIdentity(), new UniqueIdentifier());
                 }
             }
         }
