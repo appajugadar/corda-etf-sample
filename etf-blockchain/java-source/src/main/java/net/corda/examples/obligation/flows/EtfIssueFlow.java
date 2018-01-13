@@ -14,10 +14,7 @@ import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.OpaqueBytes;
 import net.corda.core.utilities.ProgressTracker;
-import net.corda.examples.obligation.EtfAsset;
-import net.corda.examples.obligation.EtfObligation;
-import net.corda.examples.obligation.Obligation;
-import net.corda.examples.obligation.ObligationContract;
+import net.corda.examples.obligation.*;
 import net.corda.finance.flows.AbstractCashFlow;
 
 import java.security.PublicKey;
@@ -81,8 +78,8 @@ public class EtfIssueFlow extends AbstractIssueFlow {
         final List<PublicKey> requiredSigners = obligation.getParticipantKeys();
 
         final TransactionBuilder utx = new TransactionBuilder(getFirstNotary())
-                .addOutputState(obligation, ObligationContract.OBLIGATION_CONTRACT_ID)
-                .addCommand(new ObligationContract.Commands.Issue(), requiredSigners)
+                .addOutputState(obligation, EtfContract.OBLIGATION_CONTRACT_ID)
+                .addCommand(new EtfContract.Commands.Issue(), requiredSigners)
                 .setTimeWindow(getServiceHub().getClock().instant(), Duration.ofSeconds(30));
 
         // Step 3. Sign the transaction.
