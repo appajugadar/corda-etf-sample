@@ -127,10 +127,16 @@ public class EtfObligation implements LinearState {
             return false;
         }
         EtfObligation other = (EtfObligation) obj;
-        return amount.equals(other.getAmount())
+
+        if(amount==null && etfAsset==null) return false;
+
+        boolean amountEq = (amount!=null) ? (amount.equals(other.getAmount())):true;
+        boolean etfAssetEq = (etfAsset!=null) ? etfAsset.equals(other.getEtfAsset()):true;
+
+        return amountEq
                 && lender.equals(other.getLender())
                 && borrower.equals(other.getBorrower())
-                && etfAsset.equals(other.getEtfAsset())
+                && etfAssetEq
                 && linearId.equals(other.getLinearId());
     }
 

@@ -39,7 +39,7 @@ public class EtfContract implements Contract {
         final Commands commandData = command.getValue();
         final Set<PublicKey> setOfSigners = new HashSet<>(command.getSigners());
         if (commandData instanceof Commands.Issue) {
-            verifyIssue(tx, setOfSigners);
+            verifyEtfIssue(tx, setOfSigners);
         } else if (commandData instanceof Commands.Transfer) {
             verifyTransfer(tx, setOfSigners);
         } else if (commandData instanceof Commands.Settle) {
@@ -57,13 +57,16 @@ public class EtfContract implements Contract {
     }
 
     // This only allows one obligation issuance per transaction.
-    private void verifyIssue(LedgerTransaction tx, Set<PublicKey> signers) {
+    private void verifyEtfIssue(LedgerTransaction tx, Set<PublicKey> signers) {
         requireThat(req -> {
             req.using("No inputs should be consumed when issuing an obligation.",
                     tx.getInputStates().isEmpty());
             req.using("Only one obligation state should be created when issuing an obligation.", tx.getOutputStates().size() == 1);
             EtfObligation obligation = (EtfObligation) tx.getOutputStates().get(0);
-            req.using("A newly issued obligation must have a positive amount.", obligation.getAmount().getQuantity() > 0);
+
+            //req.using("A newly issued obligation must have a positive amount.", obligation.getAmount().getQuantity() > 0);
+            req.using("A newly issued ETF obligation must have a positive quantity.", obligation.getEtfAsset().getQuantity() > 0);
+
             req.using("The lender and borrower cannot be the same identity.", !obligation.getBorrower().equals(obligation.getLender()));
             req.using("Both lender and borrower together only may sign obligation issue transaction.",
                     signers.equals(keysFromParticipants(obligation)));
