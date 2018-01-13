@@ -6,6 +6,7 @@ import net.corda.core.contracts.LinearState;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
+import net.corda.core.serialization.CordaSerializable;
 
 import java.security.PublicKey;
 import java.util.Currency;
@@ -14,6 +15,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import static net.corda.core.utilities.EncodingUtils.toBase58String;
 
+@CordaSerializable
 public class EtfObligation implements LinearState {
 
     private final EtfAsset etfAsset;
