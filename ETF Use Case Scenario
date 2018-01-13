@@ -1,22 +1,33 @@
-AP Node
+AP Node 1
 1. Self issue cash
-2. Self issue etf
-3. Buy ETF
+2. Self issue etf  							ETfIssueFlow (cash)
+3. Buy ETF     								EtfBuyInitiatorFlow (buy quantity, buy amount)
+
 4. Sell ETF
 5. Transact buy/sell with agent
 
-AP agent Node
+AP agent Node 1
 1. View AP's ledger for cash/etf
-2. Transact buy/sell with AP
-3. Transact buy/sell with ETF Custodian
+2. Transact buy/sell with AP						EtfBuyResponderFlow
+3. Transact buy/sell with ETF Custodian					
 
 
-Custodian Node
-1. Transact buy/sell with AP agent
-2. Validate basket
+Custodian Node (common custodian for both Agents)
+1. Transact buy/sell with AP agent					EtfBuyInitiatorFlow (buy quantity, buy amount)
+2. Validate basket							EtfSellResponderFlow
 3. Notify Transfer Agent and sponserer
 
  
 TA+DTCC Node
-1. Transact with custodian
-2. Transact with AP to deposit ETF
+1. Transact with custodian						EtfSellTwoPartyTradeFlow extends TwoPartyTradeFlow
+2. Transact with AP to deposit ETF					EtfBuyTwoPartyTradeFlow	extends TwoPartyTradeFlow
+
+
+AP Node 2
+1. Self Issue Etf							ETfIssueFlow (cash)
+2. Sell ETF								EtfSellInitatorFlow (sell quantity, sell amount)
+
+AP agent Node 2
+1. View AP's ledger for cash/etf
+2. Transact buy/sell with AP						EtfSellResponderFlow 
+
