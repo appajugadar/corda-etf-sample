@@ -35,6 +35,7 @@ import static net.corda.finance.contracts.GetBalances.getCashBalances;
 
 @Path("issue")
 public class EtfRestApi {
+
     private final CordaRPCOps rpcOps;
     private final Party myIdentity;
 
