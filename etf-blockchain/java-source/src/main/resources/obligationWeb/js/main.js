@@ -4,7 +4,7 @@
 angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', function($http, $location, $uibModal) {
     const demoApp = this;
 
-    const apiBaseURL = "/api/obligation/";
+    const apiBaseURL = "/api/issue/";
 
     // Retrieves the identity of this and other nodes.
     let peers = [];
@@ -40,7 +40,19 @@ angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', func
 
         issueCashModal.result.then(() => {}, () => {});
     };
+    /** Displays the cash issuance modal. */
+    demoApp.openSelfIssueEtfModal = () => {
+        const selfIssueEtfModal = $uibModal.open({
+            templateUrl: 'selfIssueEtfModal.html',
+            controller: 'SelfIssueEtfModalCtrl',
+            controllerAs: 'selfIssueEtfModal',
+            resolve: {
+                apiBaseURL: () => apiBaseURL
+            }
+        });
 
+        selfIssueEtfModal.result.then(() => {}, () => {});
+    };
     /** Displays the IOU transfer modal. */
     demoApp.openTransferModal = (id) => {
         const transferModal = $uibModal.open({

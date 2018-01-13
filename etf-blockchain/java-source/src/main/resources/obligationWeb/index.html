@@ -19,6 +19,7 @@
     <script src="js/main.js"></script>
     <script src="js/createIOUModal.js"></script>
     <script src="js/issueCashModal.js"></script>
+    <script src="js/selfIssueEtfModal.js"></script>
     <script src="js/transferModal.js"></script>
     <script src="js/settleModal.js"></script>
 </head>
@@ -31,6 +32,7 @@
         </div>
         <button ng-click="demoApp.openCreateIOUModal()" type="button" class="btn btn-primary navbar-btn">Create IOU</button>
         <button ng-click="demoApp.openIssueCashModal()" type="button" class="btn btn-primary navbar-btn">Issue cash</button>
+        <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn btn-primary navbar-btn">Self Issue Etf</button>
         <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
                 class="glyphicon glyphicon-refresh"></span></button>
     </div>
@@ -111,6 +113,43 @@
         {{ issueCashMsgModal.message }}
     </div>
 </script>
+
+
+<script type="text/ng-template" id="selfIssueEtfModal.html">
+    <div class="modal-header">
+        <h4 class="modal-title">Self-issue Etf</h4>
+    </div>
+    <form>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="selfIssueEtf" class="control-label">ETF Name:</label>
+                <input type="text" ng-model="selfIssueEtfModal.form.etfName" class="form-control" id="selfIssueEtf">
+            </div>
+            <div class="form-group">
+                <label for="selfIssueEtfQty" class="control-label">Quantity (Int):</label>
+                <input type="text" ng-model="selfIssueEtfModal.form.quantity" class="form-control" id="selfIssueEtfQty">
+            </div>
+            <div ng-show="selfIssueEtfModal.formError" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="sr-only">Error:</span>
+                    Enter valid self Etf issuance parameters.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button ng-click="selfIssueEtfModal.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="selfIssueEtfModal.issue()" type="button" class="btn btn-primary">Issue self ETF</button>
+        </div>
+    </form>
+</script>
+
+<script type="text/ng-template" id="selfIssueEtfMsgModal.html">
+    <div class="modal-body" id="self-issue-etf-modal-body">
+        {{ selfIssueEtfMsgModal.message }}
+    </div>
+</script>
+
 
 <script type="text/ng-template" id="transferModal.html">
     <div class="modal-header">
