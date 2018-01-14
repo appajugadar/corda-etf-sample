@@ -27,6 +27,21 @@ angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', func
         createIOUModal.result.then(() => {}, () => {});
     };
 
+    /** Displays the ETF creation modal. */
+    demoApp.openBuySellETFModal = () => {
+        const createETFModal = $uibModal.open({
+            templateUrl: 'createETFModal.html',
+            controller: 'CreateETFModalCtrl',
+            controllerAs: 'createETFModal',
+            resolve: {
+                apiBaseURL: () => apiBaseURL,
+                peers: () => peers
+            }
+        });
+
+        // Ignores the modal result events.
+        createETFModal.result.then(() => {}, () => {});
+    };
     /** Displays the cash issuance modal. */
     demoApp.openIssueCashModal = () => {
         const issueCashModal = $uibModal.open({
@@ -102,3 +117,7 @@ angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', func
 angular.module('demoAppModule').config(['$qProvider', function($qProvider) {
     $qProvider.errorOnUnhandledRejections(false);
 }]);
+
+angular.module("buysell", []).controller("Example", ["$scope", function($scope) {
+    $scope.createIOUModal.form.buysell = "buy"
+}])

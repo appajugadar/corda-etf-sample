@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IOU v2 CorDapp</title>
+    <title>ETF v2 CorDapp</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
@@ -18,6 +18,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js"></script>
     <script src="js/main.js"></script>
     <script src="js/createIOUModal.js"></script>
+    <script src="js/createETFModal.js"></script>
     <script src="js/issueCashModal.js"></script>
     <script src="js/selfIssueEtfModal.js"></script>
     <script src="js/transferModal.js"></script>
@@ -30,7 +31,8 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
         </div>
-        <button ng-click="demoApp.openCreateIOUModal()" type="button" class="btn btn-primary navbar-btn">Create IOU</button>
+        <!--button ng-click="demoApp.openCreateIOUModal()" type="button" class="btn btn-primary navbar-btn">Create IOU</button-->
+        <button ng-click="demoApp.openBuySellETFModal()" type="button" class="btn btn-primary navbar-btn">Buy-Sell ETF</button>
         <button ng-click="demoApp.openIssueCashModal()" type="button" class="btn btn-primary navbar-btn">Issue cash</button>
         <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn btn-primary navbar-btn">Self Issue Etf</button>
         <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
@@ -38,44 +40,95 @@
     </div>
 </nav>
 
-<script type="text/ng-template" id="createIOUModal.html">
+<script type="text/ng-template" id="createETFModal.html">
     <div class="modal-header">
-        <h4 class="modal-title">Add new IOU</h4>
+        <h4 class="modal-title">Add new ETF Request</h4>
     </div>
+
+    <!--div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Buy OR Sell:</h3>
+                </div>
+                <div class="panel-body">
+                    <form name="buysell">
+                        <input type="radio" ng-model="myVar" value="BUY">BUY
+                        <input type="radio" ng-model="myVar" value="SELL">SELL
+                    </form>
+
+                    <div ng-switch="myVar">
+                        <div ng-switch-when="BUY">
+                            <h1>Buy</h1>
+                            <p>Welcome to a world of BUY.</p>
+                        </div>
+                        <div ng-switch-when="SELL">
+                            <h1>Sell</h1>
+                            <p>Welcome to a world of SELL.</p>
+                        </div>
+                    </div>
+
+                    <div ng-app="buysell" ng-controller="Example">
+                        <input type="radio" id="radio1" ng-model="test1" value="buy" tabindex="1" />
+                        <label for="radio1">Buy</label>
+                        <input type="radio" id="radio2" ng-model="test1" value="sell" tabindex="2"/>
+                        <label for="radio2">Sell</label>
+                        <a class="undo" ng-click="test1 = null">&otimes;</a>
+                        <hr />
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+    </div-->
+
+
     <form>
-        <div class="modal-body">
+        <div class="modal-body" >
+            <div class="form-group" ng-app="buysell" ng-controller="Example">
+                <input type="radio" id="radio1" ng-model="createETFModal.form.buysell" value="buy" tabindex="1" />
+                <label for="radio1">Buy</label>
+                <input type="radio" id="radio2" ng-model="createETFModal.form.buysell" value="sell" tabindex="2"/>
+                <label for="radio2">Sell</label>
+                <a class="undo" ng-click="createETFModal.form.buysell = null">&otimes;</a>
+            </div>
             <div class="form-group">
-                <label for="createIOUCounterparty" class="control-label">Counter-party:</label>
-                <select ng-model="createIOUModal.form.counterparty" class="form-control" id="createIOUCounterparty"
-                        ng-options="peer as peer for peer in createIOUModal.peers">
+                <label for="createETFCounterparty" class="control-label">Counter-party:</label>
+                <select ng-model="createETFModal.form.counterparty" class="form-control" id="createETFCounterparty"
+                        ng-options="peer as peer for peer in createETFModal.peers">
                 </select>
             </div>
             <div class="form-group">
-                <label for="createIOUCurrency" class="control-label">Currency (ISO code):</label>
-                <input type="text" ng-model="createIOUModal.form.currency" class="form-control" id="createIOUCurrency">
+                <label for="createETFName" class="control-label">ETF Name :</label>
+                <input type="text" ng-model="createETFModal.form.etfName" class="form-control" id="createETFName">
             </div>
             <div class="form-group">
-                <label for="createIOUAmount" class="control-label">Amount (Int):</label>
-                <input type="text" ng-model="createIOUModal.form.amount" class="form-control" id="createIOUAmount">
+                <label for="createETFCurrency" class="control-label">Currency (ISO code):</label>
+                <input type="text" ng-model="createETFModal.form.currency" class="form-control" id="createETFCurrency">
             </div>
-            <div ng-show="createIOUModal.formError" class="form-group">
+            <div class="form-group">
+                <label for="createETFQuantity" class="control-label">Quantity (Int):</label>
+                <input type="text" ng-model="createETFModal.form.quantity" class="form-control" id="createETFQuantity">
+            </div>
+            <div ng-show="createETFModal.formError" class="form-group">
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
-                    Enter valid IOU creation parameters
+                    Enter valid ETF creation parameters
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button ng-click="createIOUModal.cancel()" type="button" class="btn btn-default">Close</button>
-            <button ng-click="createIOUModal.create()" type="button" class="btn btn-primary">Create IOU</button>
+            <button ng-click="createETFModal.cancel()" type="button" class="btn btn-default">Close</button>
+            <button ng-click="createETFModal.create()" type="button" class="btn btn-primary">Create ETF</button>
         </div>
     </form>
 </script>
 
-<script type="text/ng-template" id="createIOUMsgModal.html">
-    <div class="modal-body" id="create-iou-modal-body">
-        {{ createIOUMsgModal.message }}
+<script type="text/ng-template" id="createETFMsgModal.html">
+    <div class="modal-body" id="create-etf-modal-body">
+        {{ createETFMsgModal.message }}
     </div>
 </script>
 
@@ -153,7 +206,7 @@
 
 <script type="text/ng-template" id="transferModal.html">
     <div class="modal-header">
-        <h4 class="modal-title">Transfer IOU</h4>
+        <h4 class="modal-title">Transfer ETF</h4>
     </div>
     <form>
         <div class="modal-body">
@@ -167,7 +220,7 @@
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
-                    Enter valid IOU transfer parameters.
+                    Enter valid ETF transfer parameters.
                 </div>
             </div>
         </div>
@@ -186,7 +239,7 @@
 
 <script type="text/ng-template" id="settleModal.html">
     <div class="modal-header">
-        <h4 class="modal-title">Settle IOU</h4>
+        <h4 class="modal-title">Settle ETF</h4>
     </div>
     <form>
         <div class="modal-body">
@@ -202,7 +255,7 @@
                 <div class="alert alert-danger" role="alert">
                     <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
-                    Enter valid IOU settle parameters.
+                    Enter valid ETF settle parameters.
                 </div>
             </div>
         </div>
@@ -248,6 +301,40 @@
 <div class="row">
     <div class="col-md-1"></div>
     <div class="col-md-10">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Etf balances:</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Etf Name</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="cash in demoApp.etfName">
+                        <td class="vert-align">{{etfName}}</td>
+                    </tr>
+                    </tbody>
+                    <tr>
+                        <th>Quantity</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="cash in demoApp.quantity">
+                        <td class="vert-align">{{quantity}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+<!--div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
         <div ng-show="!demoApp.ious.length" class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">There are no recorded IOUs</h3>
@@ -290,7 +377,55 @@
         </div>
         <div class="col-md-1"></div>
     </div>
-</div>
+</div-->
 
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10">
+        <div ng-show="!demoApp.etfRecorded.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">There are no recorded ETFs</h3>
+            </div>
+            <div class="panel-body">Use the "Create ETF" button to send an ETF to a peer.</div>
+        </div>
+        <div ng-show="demoApp.etfRecorded.length" class="panel panel-primary">
+            <div class="panel-heading">
+                <h3 class="panel-title">Recorded ETFs:</h3>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>ETF Name</th>
+                        <th>Quantity</th>
+                        <th>Amount</th>
+                        <th>Paid</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="etf in demoApp.etfRecorded">
+                        <td class="vert-align">{{etf.lender.substring(0, 10)}}</td>
+                        <td class="vert-align">{{etf.borrower.substring(0, 10)}}</td>
+                        <td class="vert-align">{{etf.amount}}</td>
+                        <td class="vert-align">{{etf.paid}}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button ng-click="demoApp.openEtfTransferModal(etf.linearId.id)" type="button" class="btn btn-primary">Transfer
+                                </button>
+                                <button ng-click="demoApp.openEtfSettleModal(etf.linearId.id)" type="button" class="btn btn-primary">Settle
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
 </body>
 </html>
