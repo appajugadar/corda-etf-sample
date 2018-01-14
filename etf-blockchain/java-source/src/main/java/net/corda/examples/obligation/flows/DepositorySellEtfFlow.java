@@ -11,7 +11,7 @@ import net.corda.examples.obligation.EtfTradeResponse;
 import java.util.Currency;
 
 
-@InitiatedBy(CustodianBuyEtfFlow.class)
+@InitiatedBy(CustodianSellEtfFlow.class)
 @InitiatingFlow
 public class DepositorySellEtfFlow extends DepositoryFlow {
 

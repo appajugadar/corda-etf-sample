@@ -9,10 +9,7 @@ import net.corda.core.utilities.UntrustworthyData;
 import java.util.Currency;
 import java.util.HashMap;
 
-
-@InitiatedBy(CustodianBuyEtfFlow.class)
-@InitiatingFlow
-public class DepositoryFlow extends FlowLogic<String> {
+abstract public class DepositoryFlow extends FlowLogic<String> {
 
     FlowSession flowSession;
 
@@ -34,23 +31,4 @@ public class DepositoryFlow extends FlowLogic<String> {
         return this.flowSession;
     }
 
-    @Suspendable
-    public String call() throws FlowException {
-        System.out.print("The depository start "+System.currentTimeMillis());
-        System.out.println("**In call method for depository flow");
-        UntrustworthyData<String> inputFromAP = flowSession.receive(String.class);
-        String input =  inputFromAP.unwrap(new UntrustworthyData.Validator<String, String>() {
-            @Override
-            public String validate(String data) throws FlowException {
-                System.out.println("**In validate method for depository flow received data "+data);
-                return data;
-            }
-        });
-        System.out.println("**In call method for depository flow -->"+input);
-        String output = "Depository Output:" + input;
-        flowSession.send(output);
-        System.out.print("The Depository end "+System.currentTimeMillis());
-        return output+"**";
-
-    }
 }
