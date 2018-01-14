@@ -20,10 +20,23 @@ import static net.corda.core.contracts.Structures.withoutIssuer;
 import static net.corda.finance.utils.StateSumming.sumCash;
 
 public class EtfContract implements Contract {
+
     public static final String OBLIGATION_CONTRACT_ID = "net.corda.examples.obligation.EtfContract";
+
+    public static final String ETF_BUY_CONTRACT = "net.corda.examples.obligation.EtfBuyContract";
+
+    public static final String ETF_SELL_CONTRACT = "net.corda.examples.obligation.EtfSellContract";
+
+    public static final String ETF_CASH_SWAP_CONTRACT = "net.corda.examples.obligation.EtfSwapContract"; //This is for DTC
 
     public interface Commands extends CommandData {
         class Issue extends TypeOnlyCommandData implements Commands {
+        }
+
+        class BuyProposal extends TypeOnlyCommandData implements Commands {
+        }
+
+        class SellProposal extends TypeOnlyCommandData implements Commands {
         }
 
         class Transfer extends TypeOnlyCommandData implements Commands {

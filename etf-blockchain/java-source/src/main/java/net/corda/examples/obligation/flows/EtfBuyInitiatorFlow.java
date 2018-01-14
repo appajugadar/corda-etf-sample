@@ -12,118 +12,138 @@ import net.corda.core.identity.AnonymousParty;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
-import net.corda.core.utilities.OpaqueBytes;
 import net.corda.core.utilities.ProgressTracker;
-import net.corda.examples.obligation.*;
-import net.corda.finance.flows.AbstractCashFlow;
+import net.corda.core.utilities.UntrustworthyData;
+import net.corda.examples.obligation.EtfAsset;
+import net.corda.examples.obligation.EtfContract;
+import net.corda.examples.obligation.EtfObligation;
+import net.corda.examples.obligation.EtfProgressTracker;
 
 import java.security.PublicKey;
 import java.time.Duration;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
+
 @InitiatingFlow
 @StartableByRPC
-public class EtfIssueFlow extends AbstractIssueFlow {
-
-    private EtfAsset etfAsset;
-    private OpaqueBytes issuerBankPartyRef;
-    private Party lender;
-    private final Boolean anonymous;
-
-    private  TransactionResult result;
-
-    public EtfIssueFlow(EtfAsset etfAsset, OpaqueBytes issuerBankPartyRef, Party lender, Boolean anonymous) {
-        super();
-        this.etfAsset = etfAsset;
-        this.issuerBankPartyRef = issuerBankPartyRef;
-        this.lender = lender;
-        this.anonymous = anonymous;
-    }
-
-    private final ProgressTracker.Step INITIALISING = new ProgressTracker.Step("Performing initial steps.");
-    private final ProgressTracker.Step BUILDING = new ProgressTracker.Step("Performing initial steps.");
-    private final ProgressTracker.Step SIGNING = new ProgressTracker.Step("Signing transaction.");
-    private final ProgressTracker.Step COLLECTING = new ProgressTracker.Step("Collecting counterparty signature.") {
-        @Override public ProgressTracker childProgressTracker() {
-            return CollectSignaturesFlow.Companion.tracker();
-        }
-    };
-    private final ProgressTracker.Step FINALISING = new ProgressTracker.Step("Finalising transaction.") {
-        @Override public ProgressTracker childProgressTracker() {
-            return FinalityFlow.Companion.tracker();
-        }
-    };
+public class EtfBuyInitiatorFlow extends AbstractIssueFlow {
 
     private final ProgressTracker progressTracker = new ProgressTracker(
-            INITIALISING, BUILDING, SIGNING, COLLECTING, FINALISING
+            EtfProgressTracker.INITIALISING, EtfProgressTracker.BUILDING, EtfProgressTracker.SIGNING, EtfProgressTracker.COLLECTING, EtfProgressTracker.FINALISING
     );
-
 
     @Override
     public ProgressTracker getProgressTracker() {
         return progressTracker;
     }
 
+    private Party fromParty;// AP
+
+    private Party toParty;
+
+    private EtfAsset etfAsset;
+
+    private Amount<Currency> amount;
+
+    private String partyRole;
+
+    private boolean anonymous;
+
+    public String getPartyRole() {
+        return partyRole;
+    }
+
+    public EtfBuyInitiatorFlow (AbstractParty fromParty, AbstractParty toParty, EtfAsset etfAsset) {
+
+        //TODO
+        if(this.getOurIdentity().getName().getCommonName().toUpperCase().contains("AP")){
+            partyRole="AP";
+        }
+
+        if(this.getOurIdentity().getName().getCommonName().toUpperCase().contains("CST")){
+            partyRole="CST";
+        }
+
+        if(this.getOurIdentity().getName().getCommonName().toUpperCase().contains("DTCC")){
+            partyRole="CLR";
+        }
+
+        this.etfAsset = etfAsset;
+    }
+
     @Suspendable
     @Override
     public SignedTransaction call() throws FlowException {
         // Step 1. Initialisation.
-        progressTracker.setCurrentStep(INITIALISING);
-        final EtfObligation obligation = createObligation();
+        progressTracker.setCurrentStep(EtfProgressTracker.INITIALISING);
+
+        EtfObligation obligation = createObligation();
+
+     //   final Amount<Currency> amount = new Amount<Currency>(100,Currency.getInstance("GBP")); //TODO obtain amount from RPC
+
         final PublicKey ourSigningKey = obligation.getBorrower().getOwningKey();
 
         // Step 2. Building.
-        progressTracker.setCurrentStep(BUILDING);
+        progressTracker.setCurrentStep(EtfProgressTracker.BUILDING);
         final List<PublicKey> requiredSigners = obligation.getParticipantKeys();
 
         final TransactionBuilder utx = new TransactionBuilder(getFirstNotary())
                 .addOutputState(obligation, EtfContract.OBLIGATION_CONTRACT_ID)
-                .addCommand(new EtfContract.Commands.Issue(), requiredSigners)
+                .addCommand(new EtfContract.Commands.BuyProposal(), requiredSigners)
                 .setTimeWindow(getServiceHub().getClock().instant(), Duration.ofSeconds(30));
 
         // Step 3. Sign the transaction.
-        progressTracker.setCurrentStep(SIGNING);
+        progressTracker.setCurrentStep(EtfProgressTracker.SIGNING);
         final SignedTransaction ptx = getServiceHub().signInitialTransaction(utx, ourSigningKey);
 
         // Step 4. Get the counter-party signature.
-        progressTracker.setCurrentStep(COLLECTING);
-        final FlowSession lenderFlow = initiateFlow(lender);
+        progressTracker.setCurrentStep(EtfProgressTracker.COLLECTING);
+        final FlowSession lenderFlow = initiateFlow(toParty);
         final SignedTransaction stx = subFlow(new CollectSignaturesFlow(
                 ptx,
                 ImmutableSet.of(lenderFlow),
                 ImmutableList.of(ourSigningKey),
-                COLLECTING.childProgressTracker())
+                CollectSignaturesFlow.tracker())
         );
 
+
+        //Step 5. invoke to party for next processing
+        FlowSession toPartySession = initiateFlow(toParty);
+        UntrustworthyData<EtfAsset> receivedData = toPartySession.sendAndReceive(EtfAsset.class, etfAsset);
+
+        //EtfAsset receivedAsset = receivedData.getFromUntrustedWorld();
+
         // Step 5. Finalise the transaction.
-        progressTracker.setCurrentStep(FINALISING);
-        return subFlow(new FinalityFlow(stx, FINALISING.childProgressTracker()));
+        progressTracker.setCurrentStep(EtfProgressTracker.FINALISING);
+        return subFlow(new FinalityFlow(stx, EtfProgressTracker.FINALISING.childProgressTracker()));
+
     }
 
     @Suspendable
     private EtfObligation createObligation() throws FlowException {
+//
         if (anonymous) {
-            final HashMap<Party, AnonymousParty> txKeys = subFlow(new SwapIdentitiesFlow(lender));
+            final HashMap<Party, AnonymousParty> txKeys = subFlow(new SwapIdentitiesFlow(toParty));
 
             if (txKeys.size() != 2) {
                 throw new IllegalStateException("Something went wrong when generating confidential identities.");
             } else if (!txKeys.containsKey(getOurIdentity())) {
                 throw new FlowException("Couldn't create our conf. identity.");
-            } else if (!txKeys.containsKey(lender)) {
+            } else if (!txKeys.containsKey(toParty)) {
                 throw new FlowException("Couldn't create lender's conf. identity.");
             }
 
-            final AbstractParty anonymousLender = txKeys.get(lender);
+            final AbstractParty anonymousLender = txKeys.get(toParty);
             final AbstractParty anonymousMe = txKeys.get(getOurIdentity());
 
             return new EtfObligation(etfAsset , anonymousLender, anonymousMe , new UniqueIdentifier());
         } else {
-            return new EtfObligation(etfAsset, lender, getOurIdentity(), new UniqueIdentifier());
+            return new EtfObligation(etfAsset, toParty, getOurIdentity(), new UniqueIdentifier());
         }
     }
 
-    @InitiatedBy(EtfIssueFlow.class)
+    @InitiatedBy(EtfBuyInitiatorFlow.class)
     public static class Responder extends FlowLogic<SignedTransaction> {
         private final FlowSession otherFlow;
 
@@ -135,6 +155,8 @@ public class EtfIssueFlow extends AbstractIssueFlow {
         @Override
         public SignedTransaction call() throws FlowException {
             final SignedTransaction stx = subFlow(new ObligationBaseFlow.SignTxFlowNoChecking(otherFlow, SignTransactionFlow.Companion.tracker()));
+            //TODO how to send back etfAsset received from ToParty to fromParty
+
             return waitForLedgerCommit(stx.getId());
         }
     }
