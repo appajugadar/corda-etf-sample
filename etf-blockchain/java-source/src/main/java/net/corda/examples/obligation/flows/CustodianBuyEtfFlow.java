@@ -18,7 +18,7 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
 
     public CustodianBuyEtfFlow(FlowSession flowSession) {
         this.flowSession = flowSession;
-        this.dipositoryName="PartyC";
+        this.dipositoryName = "DEPOSITORY";
         System.out.println("**Inside custodian called by "+flowSession.getCounterparty());
     }
 
