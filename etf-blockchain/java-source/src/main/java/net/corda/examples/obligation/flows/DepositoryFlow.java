@@ -17,9 +17,9 @@ abstract public class DepositoryFlow extends FlowLogic<String> {
 
     static HashMap<String,Integer> etf = new HashMap<String, Integer> (); //
 
-    static HashMap<String,Party> buyParty = new HashMap<String, Party>();
+    static HashMap<String,FlowSession> buyParty = new HashMap<String, FlowSession>();
 
-    static HashMap<String,Party> sellParty = new HashMap<String, Party>();
+    static HashMap<String,FlowSession> sellParty = new HashMap<String, FlowSession>();
 
     public DepositoryFlow(FlowSession flowSession) {
         this.flowSession = flowSession;

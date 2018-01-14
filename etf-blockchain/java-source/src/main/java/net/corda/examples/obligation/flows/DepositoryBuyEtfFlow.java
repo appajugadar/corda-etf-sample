@@ -21,7 +21,7 @@ public class DepositoryBuyEtfFlow extends DepositoryFlow {
         super(flowSession);
         this.flowSession = flowSession;
         System.out.println("**Inside depository called by "+flowSession.getCounterparty());
-        DepositoryFlow.buyParty.put(flowSession.getCounterparty().getName().getOrganisation(), flowSession.getCounterparty() );
+        DepositoryFlow.buyParty.put(flowSession.getCounterparty().getName().getOrganisation(), flowSession );
     }
 
     @Suspendable
@@ -49,15 +49,20 @@ public class DepositoryBuyEtfFlow extends DepositoryFlow {
             System.out.println("**In call method for depository flow -->"+input);
         }
 
-        System.out.println("**In call method for depository flow -->"+input);
-
-        System.out.println("**In call method for depository flow -->"+input);
-        String output = "Depository Output:" + etfQuantity;
-
-        EtfTradeResponse etfTradeResponse = new EtfTradeResponse(input.getToPartyName(),input.getEtfName(),etfQuantity,input.getAmount());
-
         if (etfQuantity != null) {
+            System.out.println("**Found match for request -->"+input);
+            EtfTradeResponse etfTradeResponse = new EtfTradeResponse(input.getToPartyName(),input.getEtfName(),etfQuantity,input.getAmount());
+            System.out.println("**Sending response back to buyers custodian -->"+etfTradeResponse);
             flowSession.send(etfTradeResponse);
+            for (String flowKey:             DepositoryFlow.sellParty.keySet()) {
+                FlowSession flowSession1 = DepositoryFlow.sellParty.get(flowKey);
+                System.out.println("**Sending response back to sellers custodian -->"+etfTradeResponse);
+                if(flowSession1!=null)
+                    flowSession1.send(etfTradeResponse);
+                System.out.println("**In call method for depository flow -->"+input);
+            }
+
+
         }
 
         System.out.print("The Depository end "+System.currentTimeMillis());
