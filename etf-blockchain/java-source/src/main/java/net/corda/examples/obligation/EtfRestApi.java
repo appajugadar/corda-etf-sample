@@ -158,7 +158,7 @@ public class EtfRestApi {
         EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, quantity, buyAmount, TradeType.BUY);
         try {
             final FlowHandle<String> flowHandle = rpcOps.startFlowDynamic(
-                    APBuyEtfFLow.class,etfTradeRequest);
+                    APBuyEtfFLow.class,etfTradeRequest,"CUSTODIAN1");
             final String result = flowHandle.getReturnValue().get();
             return Response.status(CREATED).entity(result).build();
         } catch (Exception e) {
@@ -176,7 +176,7 @@ public class EtfRestApi {
         EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, quantity, sellAmount, TradeType.SELL);
         try {
             final FlowHandle<String> flowHandle = rpcOps.startFlowDynamic(
-                    APSellEtfFLow.class,etfTradeRequest);
+                    APSellEtfFLow.class,etfTradeRequest,"CUSTODIAN2");
             final String result = flowHandle.getReturnValue().get();
             return Response.status(CREATED).entity(result).build();
         } catch (Exception e) {
