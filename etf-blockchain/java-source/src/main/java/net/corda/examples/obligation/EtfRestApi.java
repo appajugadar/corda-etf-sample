@@ -234,6 +234,41 @@ public class EtfRestApi {
     }
 
     @GET
+    @Path("issue-etf-buy-sell")
+    public Response issueETFBuySell(
+            @QueryParam(value = "buysell") String buysell,
+            @QueryParam(value = "counterparty") String counterparty,
+            @QueryParam(value = "etfName") String etfName,
+            @QueryParam(value = "currency") String currency,
+            @QueryParam(value = "quantity") int quantity){
+        return Response.status(CREATED).entity("TEST issueETFBuySell SUCCESS").build();
+        /*// 1. Get party objects for the counterparty.
+        final Set<Party> lenderIdentities = rpcOps.partiesFromName(counterparty, false);
+        if (lenderIdentities.size() != 1) {
+            final String errMsg = String.format("Found %d identities for the lender.", lenderIdentities.size());
+            throw new IllegalStateException(errMsg);
+        }
+        final Party lenderIdentity = lenderIdentities.iterator().next();
+
+        // 2. Create an amount object.
+        final Amount issueAmount = new Amount<>((long) amount * 100, Currency.getInstance(currency));
+
+        // 3. Start the IssueObligation flow. We block and wait for the flow to return.
+        try {
+            final FlowHandle<SignedTransaction> flowHandle = rpcOps.startFlowDynamic(
+                    IssueObligation.Initiator.class,
+                    issueAmount, lenderIdentity, true
+            );
+
+            final SignedTransaction result = flowHandle.getReturnValue().get();
+            final String msg = String.format("Transaction id %s committed to ledger.\n%s",
+                    result.getId(), result.getTx().getOutputStates().get(0));
+            return Response.status(CREATED).entity(msg).build();
+        } catch (Exception e) {
+            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+        }*/
+    }
+    @GET
     @Path("transfer-obligation")
     public Response transferObligation(
             @QueryParam(value = "id") String id,
