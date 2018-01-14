@@ -9,10 +9,7 @@ import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.messaging.FlowHandle;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.utilities.OpaqueBytes;
-import net.corda.examples.obligation.flows.EtfIssueFlow;
-import net.corda.examples.obligation.flows.IssueObligation;
-import net.corda.examples.obligation.flows.SettleObligation;
-import net.corda.examples.obligation.flows.TransferObligation;
+import net.corda.examples.obligation.flows.*;
 import net.corda.finance.contracts.asset.Cash;
 import net.corda.finance.flows.AbstractCashFlow;
 import net.corda.finance.flows.CashIssueFlow;
@@ -133,6 +130,7 @@ public class EtfRestApi {
         final EtfAsset etfAsset = new EtfAsset(etfName, quantity);
 
         final List<Party> notaries = rpcOps.notaryIdentities();
+
         if (notaries.isEmpty()) {
             throw new IllegalStateException("Could not find a notary.");
         }
@@ -149,6 +147,42 @@ public class EtfRestApi {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+
+    @GET
+    @Path("buy-etf-from-party")
+    public Response initiateBuyEtf(
+            @QueryParam(value = "toPartyName") String toPartyName,
+            @QueryParam(value = "etfName") String etfName,
+            @QueryParam(value = "quantity") int quantity,
+            @QueryParam(value = "buyamount") int buyAmount) {
+        EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, quantity, buyAmount, TradeType.BUY);
+        try {
+            final FlowHandle<String> flowHandle = rpcOps.startFlowDynamic(
+                    APBuyEtfFLow.class,etfTradeRequest);
+            final String result = flowHandle.getReturnValue().get();
+            return Response.status(CREATED).entity(result).build();
+        } catch (Exception e) {
+            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+    @GET
+    @Path("sell-etf-to-party")
+    public Response initiateSellEtf(
+            @QueryParam(value = "toPartyName") String toPartyName,
+            @QueryParam(value = "etfName") String etfName,
+            @QueryParam(value = "quantity") int quantity, @QueryParam(value = "sellamount") int sellAmount) {
+
+        EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, quantity, sellAmount, TradeType.SELL);
+        try {
+            final FlowHandle<String> flowHandle = rpcOps.startFlowDynamic(
+                    APSellEtfFLow.class,etfTradeRequest);
+            final String result = flowHandle.getReturnValue().get();
+            return Response.status(CREATED).entity(result).build();
+        } catch (Exception e) {
+            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        }
 
     @GET
     @Path("issue-obligation")
@@ -179,6 +213,21 @@ public class EtfRestApi {
             final String msg = String.format("Transaction id %s committed to ledger.\n%s",
                     result.getId(), result.getTx().getOutputStates().get(0));
             return Response.status(CREATED).entity(msg).build();
+        } catch (Exception e) {
+            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+
+    @GET
+    @Path("call-buy-etf")
+    public Response callBuyEtfFlow(
+            @QueryParam(value = "input") String input,
+            @QueryParam(value = "custodianName") String custodianName) {
+        try {
+            final FlowHandle<String> flowHandle  = rpcOps.startFlowDynamic(APSellEtfFLow.class, input,custodianName);
+            final String result = flowHandle.getReturnValue().get();
+            return Response.status(CREATED).entity(result).build();
         } catch (Exception e) {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
         }
