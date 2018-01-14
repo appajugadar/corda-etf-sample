@@ -1,5 +1,8 @@
 package net.corda.examples.obligation;
 
+import net.corda.core.serialization.CordaSerializable;
+
+@CordaSerializable
 public class EtfTradeResponse {
 
     String toPartyName;
