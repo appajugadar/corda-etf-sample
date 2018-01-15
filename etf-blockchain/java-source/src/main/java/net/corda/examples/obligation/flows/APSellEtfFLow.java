@@ -12,9 +12,9 @@ import net.corda.examples.obligation.EtfTradeResponse;
 @StartableByRPC
 public class APSellEtfFLow extends FlowLogic<String> {
 
-    EtfTradeRequest etfTradeRequest;
+    private EtfTradeRequest etfTradeRequest;
 
-    String custodianName;
+    private String custodianName;
 
     public APSellEtfFLow(EtfTradeRequest etfTradeRequest, String custodianName) {
         this.etfTradeRequest = etfTradeRequest;
@@ -22,7 +22,7 @@ public class APSellEtfFLow extends FlowLogic<String> {
         System.out.println("The input is "+etfTradeRequest +" for custodian "+custodianName);
     }
 
-@Suspendable
+    @Suspendable
     public String call() throws FlowException {
         System.out.println("The APSellFLow is initiated time "+System.currentTimeMillis());
         FlowSession toPartySession = initiateFlow(getCustodian(custodianName));
@@ -35,15 +35,7 @@ public class APSellEtfFLow extends FlowLogic<String> {
 
     private Party getCustodian(String custodianName) {
         Iterable<PartyAndCertificate> partyAndCertificates = this.getServiceHub().getIdentityService().getAllIdentities();
-
-        for (PartyAndCertificate party : partyAndCertificates) {
-            System.out.println("Party "+party.getParty());
-            System.out.println("getName "+party.getParty().getName().getOrganisation());
-            if (party.getName().getOrganisation().contains(custodianName)) {
-                return party.getParty();
-            }
-        }
-        return null;
+        return IdentityHelper.getPartyWithName(partyAndCertificates, custodianName);
     }
 
 }
