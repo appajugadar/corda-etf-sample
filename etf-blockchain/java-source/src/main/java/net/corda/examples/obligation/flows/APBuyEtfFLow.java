@@ -1,10 +1,13 @@
 package net.corda.examples.obligation.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
-import net.corda.core.flows.*;
+import net.corda.core.flows.FlowException;
+import net.corda.core.flows.FlowLogic;
+import net.corda.core.flows.FlowSession;
+import net.corda.core.flows.InitiatingFlow;
+import net.corda.core.flows.StartableByRPC;
 import net.corda.core.identity.Party;
 import net.corda.core.identity.PartyAndCertificate;
-import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.utilities.UntrustworthyData;
 import net.corda.examples.obligation.EtfTradeRequest;
 import net.corda.examples.obligation.EtfTradeResponse;

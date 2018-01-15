@@ -28,15 +28,8 @@ public class CustodianSellEtfFlow extends FlowLogic<String> {
         System.out.println("**In call method for custodian flow");
         UntrustworthyData<EtfTradeRequest> inputFromAP = flowSession.receive(EtfTradeRequest.class);
 
-
-        EtfTradeRequest sendToDipository =  inputFromAP.unwrap(new UntrustworthyData.Validator<EtfTradeRequest, EtfTradeRequest>() {
-            @Override
-            public EtfTradeRequest validate(EtfTradeRequest data) throws FlowException {
-                System.out.println("**In validate method for custodian flow received data "+data);
-                return data;
-            }
-        });
-
+        EtfTradeRequest sendToDipository =  SerilazationHelper.getEtfTradeRequest(inputFromAP);
+        
         System.out.println("**In call method for custodian flow -->"+sendToDipository);
 
         FlowSession toPartySession = initiateFlow(getDipository(dipositoryName));

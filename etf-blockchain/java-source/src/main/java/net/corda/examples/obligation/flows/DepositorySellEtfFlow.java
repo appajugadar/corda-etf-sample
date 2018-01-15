@@ -31,14 +31,7 @@ public class DepositorySellEtfFlow extends DepositoryFlow {
         System.out.println("**In call method for depository flow");
 
         UntrustworthyData<EtfTradeRequest> inputFromAP = flowSession.receive(EtfTradeRequest.class); // Etf
-        EtfTradeRequest input =  inputFromAP.unwrap(new UntrustworthyData.Validator<EtfTradeRequest, EtfTradeRequest>() {
-            @Override
-            public EtfTradeRequest validate(EtfTradeRequest data) throws FlowException {
-                System.out.println("**In validate method for depository flow received data "+data);
-                return data;
-            }
-        });
-
+        EtfTradeRequest input =  SerilazationHelper.getEtfTradeRequest(inputFromAP);
         System.out.println("**In call method for depository flow -->"+input);
 
         DepositoryFlow.etf.put("PNG", input.getQuantity());

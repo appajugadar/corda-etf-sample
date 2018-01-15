@@ -29,14 +29,8 @@ public class DepositoryBuyEtfFlow extends DepositoryFlow {
         System.out.print("The depository start "+System.currentTimeMillis());
         System.out.println("**In call method for depository flow");
         UntrustworthyData<EtfTradeRequest> inputFromAP = flowSession.receive(EtfTradeRequest.class); //Input is Cash
-        EtfTradeRequest input =  inputFromAP.unwrap(new UntrustworthyData.Validator<EtfTradeRequest, EtfTradeRequest>() {
-            @Override
-            public EtfTradeRequest validate(EtfTradeRequest data) throws FlowException {
-                System.out.println("**In validate method for depository flow received data "+data);
-                return data;
-            }
-        });
-
+        EtfTradeRequest input =  SerilazationHelper.getEtfTradeRequest(inputFromAP);
+        
         Currency currency = Currency.getInstance("GBP");
         DepositoryFlow.cash.put("GBP", new Amount<Currency>(input.getAmount(), currency));
 
@@ -65,14 +59,7 @@ public class DepositoryBuyEtfFlow extends DepositoryFlow {
         }else{
             //
             UntrustworthyData<EtfTradeResponse> responseFromDepositorySellFlow = this.getFlowSession().receive(EtfTradeResponse.class);
-            EtfTradeResponse etfTradeResponse =  responseFromDepositorySellFlow.unwrap(new UntrustworthyData.Validator<EtfTradeResponse, EtfTradeResponse>() {
-                @Override
-                public EtfTradeResponse validate(EtfTradeResponse data) throws FlowException {
-                    System.out.println("**In validate method for depository flow received data "+data);
-                    return data;
-                }
-            });
-
+            EtfTradeResponse etfTradeResponse =  SerilazationHelper.getEtfTradeResponse(responseFromDepositorySellFlow);
             flowSession.send(etfTradeResponse);
         }
 
