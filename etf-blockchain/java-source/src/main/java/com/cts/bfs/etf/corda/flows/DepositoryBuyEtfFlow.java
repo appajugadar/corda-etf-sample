@@ -1,15 +1,16 @@
-package net.corda.examples.obligation.flows;
+package com.cts.bfs.etf.corda.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
 import net.corda.core.contracts.Amount;
 import net.corda.core.flows.*;
 import net.corda.core.utilities.UntrustworthyData;
-import net.corda.examples.obligation.EtfTradeRequest;
-import net.corda.examples.obligation.EtfTradeResponse;
-import net.corda.examples.obligation.util.SerilazationHelper;
 
 import java.util.Currency;
 import java.util.Set;
+
+import com.cts.bfs.etf.corda.model.EtfTradeRequest;
+import com.cts.bfs.etf.corda.model.EtfTradeResponse;
+import com.cts.bfs.etf.corda.util.SerilazationHelper;
 
 @InitiatedBy(CustodianBuyEtfFlow.class)
 @InitiatingFlow

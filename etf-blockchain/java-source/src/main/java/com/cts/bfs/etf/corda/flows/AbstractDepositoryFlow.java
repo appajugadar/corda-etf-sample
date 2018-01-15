@@ -1,4 +1,4 @@
-package net.corda.examples.obligation.flows;
+package com.cts.bfs.etf.corda.flows;
 
 import java.util.Currency;
 import java.util.HashMap;

@@ -1,6 +1,8 @@
 package net.corda.examples.obligation.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
+
+import com.cts.bfs.etf.corda.util.EtfProgressTracker;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.corda.confidential.SwapIdentitiesFlow;
@@ -17,7 +19,6 @@ import net.corda.core.utilities.UntrustworthyData;
 import net.corda.examples.obligation.EtfAsset;
 import net.corda.examples.obligation.EtfContract;
 import net.corda.examples.obligation.EtfObligation;
-import net.corda.examples.obligation.EtfProgressTracker;
 
 import java.security.PublicKey;
 import java.time.Duration;

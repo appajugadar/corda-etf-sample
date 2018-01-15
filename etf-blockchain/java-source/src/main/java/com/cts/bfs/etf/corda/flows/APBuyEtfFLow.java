@@ -1,4 +1,9 @@
-package net.corda.examples.obligation.flows;
+package com.cts.bfs.etf.corda.flows;
+
+import com.cts.bfs.etf.corda.model.EtfTradeRequest;
+import com.cts.bfs.etf.corda.model.EtfTradeResponse;
+import com.cts.bfs.etf.corda.util.IdentityHelper;
+import com.cts.bfs.etf.corda.util.SerilazationHelper;
 
 import co.paralleluniverse.fibers.Suspendable;
 import net.corda.core.flows.FlowException;
@@ -9,10 +14,6 @@ import net.corda.core.flows.StartableByRPC;
 import net.corda.core.identity.Party;
 import net.corda.core.identity.PartyAndCertificate;
 import net.corda.core.utilities.UntrustworthyData;
-import net.corda.examples.obligation.EtfTradeRequest;
-import net.corda.examples.obligation.EtfTradeResponse;
-import net.corda.examples.obligation.util.IdentityHelper;
-import net.corda.examples.obligation.util.SerilazationHelper;
 
 @InitiatingFlow
 @StartableByRPC

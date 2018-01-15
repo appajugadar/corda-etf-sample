@@ -1,4 +1,4 @@
-package net.corda.examples.obligation.util;
+package com.cts.bfs.etf.corda.util;
 
 import net.corda.core.identity.Party;
 import net.corda.core.identity.PartyAndCertificate;

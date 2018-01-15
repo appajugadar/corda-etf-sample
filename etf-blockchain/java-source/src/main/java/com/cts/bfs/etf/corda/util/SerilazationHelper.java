@@ -1,9 +1,10 @@
-package net.corda.examples.obligation.util;
+package com.cts.bfs.etf.corda.util;
+
+import com.cts.bfs.etf.corda.model.EtfTradeRequest;
+import com.cts.bfs.etf.corda.model.EtfTradeResponse;
 
 import net.corda.core.flows.FlowException;
 import net.corda.core.utilities.UntrustworthyData;
-import net.corda.examples.obligation.EtfTradeRequest;
-import net.corda.examples.obligation.EtfTradeResponse;
 
 public class SerilazationHelper {
 

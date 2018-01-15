@@ -1,4 +1,4 @@
-package net.corda.examples.obligation.schema;
+package com.cts.bfs.etf.corda.schema;
 
 import java.util.Date;
 import javax.persistence.Column;
