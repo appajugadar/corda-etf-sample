@@ -6,6 +6,7 @@ import net.corda.core.flows.*;
 import net.corda.core.utilities.UntrustworthyData;
 import net.corda.examples.obligation.EtfTradeRequest;
 import net.corda.examples.obligation.EtfTradeResponse;
+import net.corda.examples.obligation.util.SerilazationHelper;
 
 import java.util.Currency;
 import java.util.Set;

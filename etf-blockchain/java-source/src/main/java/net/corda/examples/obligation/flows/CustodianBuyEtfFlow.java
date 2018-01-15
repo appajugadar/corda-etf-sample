@@ -1,5 +1,7 @@
 package net.corda.examples.obligation.flows;
 
+import static net.corda.examples.obligation.util.SerilazationHelper.getEtfTradeRequest;
+
 import co.paralleluniverse.fibers.Suspendable;
 import net.corda.core.flows.*;
 import net.corda.core.identity.Party;
@@ -7,7 +9,8 @@ import net.corda.core.identity.PartyAndCertificate;
 import net.corda.core.utilities.UntrustworthyData;
 import net.corda.examples.obligation.EtfTradeRequest;
 import net.corda.examples.obligation.EtfTradeResponse;
-import static net.corda.examples.obligation.flows.SerilazationHelper.getEtfTradeRequest;
+import net.corda.examples.obligation.util.IdentityHelper;
+import net.corda.examples.obligation.util.SerilazationHelper;
 
 @InitiatedBy(APBuyEtfFLow.class)
 @InitiatingFlow

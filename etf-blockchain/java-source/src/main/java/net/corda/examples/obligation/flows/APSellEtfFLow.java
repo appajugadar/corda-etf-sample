@@ -7,6 +7,8 @@ import net.corda.core.identity.PartyAndCertificate;
 import net.corda.core.utilities.UntrustworthyData;
 import net.corda.examples.obligation.EtfTradeRequest;
 import net.corda.examples.obligation.EtfTradeResponse;
+import net.corda.examples.obligation.util.IdentityHelper;
+import net.corda.examples.obligation.util.SerilazationHelper;
 
 @InitiatingFlow
 @StartableByRPC

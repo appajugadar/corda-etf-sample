@@ -11,6 +11,7 @@ import net.corda.core.flows.InitiatingFlow;
 import net.corda.core.utilities.UntrustworthyData;
 import net.corda.examples.obligation.EtfTradeRequest;
 import net.corda.examples.obligation.EtfTradeResponse;
+import net.corda.examples.obligation.util.SerilazationHelper;
 
 
 @InitiatedBy(CustodianSellEtfFlow.class)

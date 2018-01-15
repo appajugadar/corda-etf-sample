@@ -1,4 +1,4 @@
-package net.corda.examples.obligation.flows;
+package net.corda.examples.obligation.util;
 
 import net.corda.core.identity.Party;
 import net.corda.core.identity.PartyAndCertificate;
