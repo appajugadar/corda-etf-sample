@@ -1,0 +1,3 @@
+http://localhost:10007/api/issue/buy-etf-from-party?toPartyName=CUSTODIAN1&etfName=PNGGOLD&quantity=100&buyamount=100
+
+http://localhost:10016/api/issue/sell-etf-to-party?toPartyName=CUSTODIAN2&etfName=PNGGOLD&quantity=100&sellamount=100
