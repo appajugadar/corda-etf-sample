@@ -2,7 +2,7 @@ package net.corda.examples.obligation.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
 
-import com.cts.bfs.etf.corda.util.EtfProgressTracker;
+import com.cts.bfs.etf.corda.flows.tracker.EtfProgressTracker;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.corda.confidential.SwapIdentitiesFlow;

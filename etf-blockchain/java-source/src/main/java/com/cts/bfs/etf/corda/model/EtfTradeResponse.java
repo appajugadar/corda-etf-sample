@@ -5,11 +5,10 @@ import net.corda.core.serialization.CordaSerializable;
 @CordaSerializable
 public class EtfTradeResponse {
 
-    String toPartyName;
-    String etfName;
-    int quantity;
-    int amount;
-
+    private String toPartyName;
+    private String etfName;
+    private int quantity;
+    private int amount;
 
     public EtfTradeResponse(String toPartyName, String etfName, int quantity, int amount) {
         this.toPartyName = toPartyName;

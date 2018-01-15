@@ -1,4 +1,4 @@
-package com.cts.bfs.etf.corda.util;
+package com.cts.bfs.etf.corda.flows.tracker;
 
 import net.corda.core.flows.CollectSignaturesFlow;
 import net.corda.core.flows.FinalityFlow;

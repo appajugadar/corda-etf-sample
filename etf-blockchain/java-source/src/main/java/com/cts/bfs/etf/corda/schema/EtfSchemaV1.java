@@ -5,9 +5,9 @@ import net.corda.core.schemas.MappedSchema;
 import net.corda.core.serialization.CordaSerializable;
 
 @CordaSerializable
-public class EtfSchemaMapper extends MappedSchema{
+public class EtfSchemaV1 extends MappedSchema{
     
-    public EtfSchemaMapper() {
+    public EtfSchemaV1() {
         super(EtfSchema.class, 1, ImmutableList.of(EtfSchema.class));
     }
 

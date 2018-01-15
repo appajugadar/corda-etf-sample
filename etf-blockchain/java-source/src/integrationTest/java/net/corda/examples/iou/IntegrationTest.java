@@ -1,8 +1,19 @@
 package net.corda.examples.iou;
 
+import static net.corda.testing.TestConstants.getDUMMY_BANK_A;
+import static net.corda.testing.TestConstants.getDUMMY_BANK_B;
+import static net.corda.testing.TestConstants.getDUMMY_NOTARY;
+import static net.corda.testing.driver.Driver.driver;
+
+import java.util.List;
+import java.util.Set;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+
 import net.corda.core.concurrent.CordaFuture;
 import net.corda.core.identity.Party;
 import net.corda.node.services.transactions.SimpleNotaryService;
@@ -10,15 +21,6 @@ import net.corda.nodeapi.internal.ServiceInfo;
 import net.corda.testing.driver.DriverParameters;
 import net.corda.testing.driver.NodeHandle;
 import net.corda.testing.driver.NodeParameters;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static net.corda.testing.TestConstants.*;
-import static net.corda.testing.driver.Driver.driver;
 
 public class IntegrationTest {
     @Test

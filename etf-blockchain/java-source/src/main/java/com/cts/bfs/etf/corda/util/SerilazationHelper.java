@@ -10,7 +10,7 @@ public class SerilazationHelper {
 
     public static EtfTradeResponse getEtfTradeResponse(UntrustworthyData<EtfTradeResponse> output) throws FlowException {
         return output.unwrap(new UntrustworthyData.Validator<EtfTradeResponse, EtfTradeResponse>() {
-            @Override
+			@Override
             public EtfTradeResponse validate(EtfTradeResponse data) throws FlowException {
                 return data;
             }
