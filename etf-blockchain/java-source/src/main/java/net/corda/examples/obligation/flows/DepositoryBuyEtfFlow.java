@@ -49,6 +49,7 @@ public class DepositoryBuyEtfFlow extends DepositoryFlow {
             System.out.println("**In call method for depository flow -->"+input);
         }
 
+
         if (etfQuantity != null) {
             System.out.println("**Found match for request -->"+input);
             EtfTradeResponse etfTradeResponse = new EtfTradeResponse(input.getToPartyName(),input.getEtfName(),etfQuantity,input.getAmount());
@@ -61,8 +62,18 @@ public class DepositoryBuyEtfFlow extends DepositoryFlow {
                     flowSession1.send(etfTradeResponse);
                 System.out.println("**In call method for depository flow -->"+input);
             }
+        }else{
+            //
+            UntrustworthyData<EtfTradeResponse> responseFromDepositorySellFlow = this.getFlowSession().receive(EtfTradeResponse.class);
+            EtfTradeResponse etfTradeResponse =  responseFromDepositorySellFlow.unwrap(new UntrustworthyData.Validator<EtfTradeResponse, EtfTradeResponse>() {
+                @Override
+                public EtfTradeResponse validate(EtfTradeResponse data) throws FlowException {
+                    System.out.println("**In validate method for depository flow received data "+data);
+                    return data;
+                }
+            });
 
-
+            flowSession.send(etfTradeResponse);
         }
 
         System.out.print("The Depository end "+System.currentTimeMillis());

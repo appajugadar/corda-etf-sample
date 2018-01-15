@@ -7,6 +7,7 @@ import net.corda.core.identity.PartyAndCertificate;
 import net.corda.core.utilities.UntrustworthyData;
 import net.corda.examples.obligation.EtfTradeRequest;
 import net.corda.examples.obligation.EtfTradeResponse;
+import static net.corda.examples.obligation.flows.SerilazationHelper.getEtfTradeRequest;
 
 @InitiatedBy(APBuyEtfFLow.class)
 @InitiatingFlow
@@ -29,25 +30,14 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
         System.out.println("**In call method for custodian flow");
         UntrustworthyData<EtfTradeRequest> inputFromAP = flowSession.receive(EtfTradeRequest.class);
 
-        EtfTradeRequest sendToDipository =  inputFromAP.unwrap(new UntrustworthyData.Validator<EtfTradeRequest, EtfTradeRequest>() {
-            @Override
-            public EtfTradeRequest validate(EtfTradeRequest data) throws FlowException {
-                System.out.println("**In validate method for custodian flow received data "+data);
-                return data;
-            }
-        });
+        EtfTradeRequest sendToDipository = getEtfTradeRequest(inputFromAP);
 
         System.out.println("**In call method for custodian flow -->"+sendToDipository);
 
 
         FlowSession toPartySession = initiateFlow(getDipository(dipositoryName));
         UntrustworthyData<EtfTradeResponse> output =  toPartySession.sendAndReceive(EtfTradeResponse.class, sendToDipository);
-        EtfTradeResponse out =  output.unwrap(new UntrustworthyData.Validator<EtfTradeResponse, EtfTradeResponse>() {
-            @Override
-            public EtfTradeResponse validate(EtfTradeResponse data) throws FlowException {
-                return data;
-            }
-        });
+        EtfTradeResponse out =  SerilazationHelper.getEtfTradeResponse(output);
 
         System.out.println("**In call method for custodian flow output from depository-->"+out);
         flowSession.send(out);
@@ -55,6 +45,7 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
 
         return " BUY-CUSTODIAN-SUCCESS ";
     }
+
 
     private Party getDipository(String dipositoryName) {
         Iterable<PartyAndCertificate> partyAndCertificates = this.getServiceHub().getIdentityService().getAllIdentities();

@@ -24,19 +24,10 @@ public class APSellEtfFLow extends FlowLogic<String> {
 
 @Suspendable
     public String call() throws FlowException {
-
         System.out.println("The APSellFLow is initiated time "+System.currentTimeMillis());
         FlowSession toPartySession = initiateFlow(getCustodian(custodianName));
-
         UntrustworthyData<EtfTradeResponse> output =  toPartySession.sendAndReceive(EtfTradeResponse.class, etfTradeRequest);
-
-        EtfTradeResponse outPutValue = output.unwrap(new UntrustworthyData.Validator<EtfTradeResponse, EtfTradeResponse>() {
-            @Override
-            public EtfTradeResponse validate(EtfTradeResponse data) throws FlowException {
-                return data;
-            }
-        });
-
+        EtfTradeResponse outPutValue = SerilazationHelper.getEtfTradeResponse(output);
         System.out.println("The APSellFLow : output from custodian : "+outPutValue);
         System.out.print("The APSellFLow end "+System.currentTimeMillis());
         return "SUCCESS";

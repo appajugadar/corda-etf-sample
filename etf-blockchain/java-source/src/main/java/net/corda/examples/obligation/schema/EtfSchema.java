@@ -9,15 +9,26 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
+import net.corda.core.schemas.PersistentState;
+import net.corda.core.schemas.StatePersistable;
 
 @Entity
 @Table(name="ETF_STATE")
-public class EtfSchema {
-
+public class EtfSchema extends PersistentState implements StatePersistable {
+/*
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private long id;
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+*/
+
 
     @Column(name = "NAME")
 	private String name;
@@ -40,13 +51,6 @@ public class EtfSchema {
     @Column(name = "MODIFIED_DATE")
     private Date updatedDate;
 
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;
@@ -111,7 +115,6 @@ public class EtfSchema {
 		result = prime * result + ((buyer == null) ? 0 : buyer.hashCode());
 		result = prime * result + ((code == null) ? 0 : code.hashCode());
 		result = prime * result + ((createdDate == null) ? 0 : createdDate.hashCode());
-		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((quantity == null) ? 0 : quantity.hashCode());
 		result = prime * result + ((seller == null) ? 0 : seller.hashCode());
@@ -143,8 +146,6 @@ public class EtfSchema {
 				return false;
 		} else if (!createdDate.equals(other.createdDate))
 			return false;
-		if (id != other.id)
-			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -170,7 +171,7 @@ public class EtfSchema {
 
 	@Override
 	public String toString() {
-		return "EtfSchema [id=" + id + ", name=" + name + ", code=" + code + ", quantity=" + quantity + ", buyer="
+		return "EtfSchema [name=" + name + ", code=" + code + ", quantity=" + quantity + ", buyer="
 				+ buyer + ", seller=" + seller + ", createdDate=" + createdDate + ", updatedDate=" + updatedDate + "]";
 	}
     

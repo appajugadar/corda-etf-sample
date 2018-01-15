@@ -18,8 +18,8 @@ public class CustodianSellEtfFlow extends FlowLogic<String> {
 
     public CustodianSellEtfFlow(FlowSession flowSession) {
         this.flowSession = flowSession;
-        this.dipositoryName="DEPOSITORY";
-        System.out.println("**Inside custodian called by "+flowSession.getCounterparty());
+        this.dipositoryName = "DEPOSITORY";
+        System.out.println("Inside custodian called by "+flowSession.getCounterparty());
     }
 
     @Suspendable
@@ -41,16 +41,10 @@ public class CustodianSellEtfFlow extends FlowLogic<String> {
 
         FlowSession toPartySession = initiateFlow(getDipository(dipositoryName));
         UntrustworthyData<EtfTradeResponse> output =  toPartySession.sendAndReceive(EtfTradeResponse.class, sendToDipository);
-
-        EtfTradeResponse out =  output.unwrap(new UntrustworthyData.Validator<EtfTradeResponse, EtfTradeResponse>() {
-            @Override
-            public EtfTradeResponse validate(EtfTradeResponse data) throws FlowException {
-                return data;
-            }
-        });
-
+        EtfTradeResponse out =  SerilazationHelper.getEtfTradeResponse(output);
         System.out.println("**In call method for custodian flow output from depository-->"+out);
-        flowSession.send(out+" (fromSendMethod) ");
+        flowSession.send(out);
+
         System.out.print("The custodian end "+System.currentTimeMillis());
         return out +" (fromOutsideSendMethod) ";
     }
