@@ -6,6 +6,9 @@ import java.util.List;
 
 public class EtfBalanceResponse {
 
+    String etfName;
+    String quantity;
+
     public EtfBalanceResponse(List<EtfTradeState> etfTradeStates) {
         this.etfTradeStates = etfTradeStates;
     }
