@@ -19,13 +19,13 @@ angular.module('demoAppModule').controller('CreateETFModalCtrl', function($http,
             const etfName = createETFModal.form.etfName;
             const currency = createETFModal.form.currency;
             const quantity = createETFModal.form.quantity;
-
+            const amount = quantity*10;
             $uibModalInstance.close();
 
             // We define the ETF creation endpoint.
             const issueETFEndpoint =
                 apiBaseURL +
-                `issue-etf-buy-sell?buysell=${buysell}&counterparty=${counterparty}&etfName=${etfName}&currency=${currency}&quantity=${quantity}`;
+                `issue-etf-buy-sell?buysell=${buysell}&counterparty=${counterparty}&etfName=${etfName}&currency=${currency}&quantity=${quantity}&amount=${amount}`;
 
             // We hit the endpoint to create the ETF and handle success/failure responses.
             $http.get(issueETFEndpoint).then(
@@ -55,7 +55,7 @@ angular.module('demoAppModule').controller('CreateETFModalCtrl', function($http,
 
     // Validates the ETF.
     function invalidFormInput() {
-        return isNaN(createETFModal.form.amount) || (createETFModal.form.counterparty === undefined);
+        return isNaN(createETFModal.form.quantity) || (createETFModal.form.counterparty === undefined);
     }
 });
 

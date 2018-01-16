@@ -62,46 +62,6 @@
         <h4 class="modal-title">Add new ETF Request</h4>
     </div>
 
-
-    <!--div class="row">
-        <div class="col-md-1"></div>
-        <div class="col-md-10">
-            <div class="panel panel-primary">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Buy OR Sell:</h3>
-                </div>
-                <div class="panel-body">
-                    <form name="buysell">
-                        <input type="radio" ng-model="myVar" value="BUY">BUY
-                        <input type="radio" ng-model="myVar" value="SELL">SELL
-                    </form>
-
-                    <div ng-switch="myVar">
-                        <div ng-switch-when="BUY">
-                            <h1>Buy</h1>
-                            <p>Welcome to a world of BUY.</p>
-                        </div>
-                        <div ng-switch-when="SELL">
-                            <h1>Sell</h1>
-                            <p>Welcome to a world of SELL.</p>
-                        </div>
-                    </div>
-
-                    <div ng-app="buysell" ng-controller="Example">
-                        <input type="radio" id="radio1" ng-model="test1" value="buy" tabindex="1" />
-                        <label for="radio1">Buy</label>
-                        <input type="radio" id="radio2" ng-model="test1" value="sell" tabindex="2"/>
-                        <label for="radio2">Sell</label>
-                        <a class="undo" ng-click="test1 = null">&otimes;</a>
-                        <hr />
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-1"></div>
-        </div>
-    </div-->
-
-
     <form class="bg-success">    <div class="modal-body" >
 
     <div class="form-group">
@@ -111,7 +71,7 @@
                 <input type="radio" name="btnn"value="sell"/>Sell
                     </label>
 
-                <a class="undo" ng-click="createETFModal.form.buysell = null">&otimes;</a>
+                <!--a class="undo" ng-click="createETFModal.form.buysell = null">&otimes;</a-->
             </div>
             <div class="form-group">
                 <label for="createETFCounterparty" class="control-label">Counter-party:</label>
@@ -128,12 +88,19 @@
                 <input type="text" ng-model="createETFModal.form.currency" class="form-control" id="createETFCurrency">
             </div>
             <div class="form-group">
-                <label for="createETFQuantity" class="control-label">Quantity (Int):</label>
-                <input type="text" ng-model="createETFModal.form.quantity" class="form-control" id="createETFQuantity">
+                <label for="createETFQuantity" class="control-label">Quantity<span class="label label-info"> (Int):</span></label>
+                <input type="text" ng-model="createETFModal.form.quantity" ng-pattern="" class="form-control" id="createETFQuantity">
             </div>
+        <div class="form-group">
+
+            <label for="createETFAmount" class="control-label">Amount<span class="label label-info"> (Int):</span></label>
+          <p>  <div>{{ createETFModal.form.quantity*10 }} </p>
+            <!--input  type="text" ng-model="createETFModal.form.amount" class="form-control" id="createETFAmount" value="{{ createETFModal.form.quantity }}" -->
+        </div>
             <div ng-show="createETFModal.formError" class="form-group">
                 <div class="alert alert-danger" role="alert">
-                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-ex
+                    clamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
                     Enter valid ETF creation parameters
                 </div>
@@ -141,7 +108,7 @@
         </div>
         <div class="modal-footer">
             <button ng-click="createETFModal.cancel()" type="button" class="btn btn-default">Close</button>
-            <button ng-click="createETFModal.create()" type="button" class="btn btn-primary">Create ETF</button>
+            <button ng-click="createETFModal.create()" type="button" class="btn btn-primary">Submit</button>
         </div>
     </form></script>
 </script>
@@ -352,52 +319,6 @@
         <div class="col-md-1"></div>
     </div>
 </div>
-<!--div class="row">
-    <div class="col-md-1"></div>
-    <div class="col-md-10">
-        <div ng-show="!demoApp.ious.length" class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">There are no recorded IOUs</h3>
-            </div>
-            <div class="panel-body">Use the "Create IOU" button to send an IOU to a peer.</div>
-        </div>
-        <div ng-show="demoApp.ious.length" class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">Recorded IOUs:</h3>
-            </div>
-            <div class="panel-body">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>From</th>
-                        <th>To</th>
-                        <th>Amount</th>
-                        <th>Paid</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="iou in demoApp.ious">
-                        <td class="vert-align">{{iou.lender.substring(0, 10)}}</td>
-                        <td class="vert-align">{{iou.borrower.substring(0, 10)}}</td>
-                        <td class="vert-align">{{iou.amount}}</td>
-                        <td class="vert-align">{{iou.paid}}</td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <button ng-click="demoApp.openTransferModal(iou.linearId.id)" type="button" class="btn btn-primary">Transfer
-                                </button>
-                                <button ng-click="demoApp.openSettleModal(iou.linearId.id)" type="button" class="btn btn-primary">Settle
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="col-md-1"></div>
-    </div>
-</div-->
 
 <div class="row">
     <div class="col-md-1"></div>
