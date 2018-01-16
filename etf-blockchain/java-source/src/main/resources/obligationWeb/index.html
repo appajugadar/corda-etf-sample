@@ -11,6 +11,20 @@
           integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="css/index.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    <style>
+    /* Remove the navbar's default margin-bottom and rounded borders */
+    .navbar {
+      margin-bottom: 0;
+      border-radius: 0;
+    }
+
+    /* Add a gray background color and some padding to the footer */
+    footer {
+      background-color: #f2f2f2;
+      padding: 25px;
+    }
+  </style>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
             crossorigin="anonymous"></script>
@@ -23,27 +37,31 @@
     <script src="js/selfIssueEtfModal.js"></script>
     <script src="js/transferModal.js"></script>
     <script src="js/settleModal.js"></script>
+
 </head>
 
-<body ng-app="demoAppModule" ng-controller="DemoAppCtrl as demoApp">
+<body ng-app="demoAppModule" ng-controller="DemoAppCtrl as demoApp" class="bg-danger">
 <nav class="navbar navbar-default">
-    <div class="container-fluid">
+    <div class="bg-danger">
         <div class="navbar-header">
             <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
         </div>
-        <!--button ng-click="demoApp.openCreateIOUModal()" type="button" class="btn btn-primary navbar-btn">Create IOU</button-->
-        <button ng-click="demoApp.openBuySellETFModal()" type="button" class="btn btn-primary navbar-btn">Buy-Sell ETF</button>
-        <button ng-click="demoApp.openIssueCashModal()" type="button" class="btn btn-primary navbar-btn">Issue cash</button>
-        <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn btn-primary navbar-btn">Self Issue Etf</button>
+        <div class="btn-group">
+
+
+        <button ng-click="demoApp.openBuySellETFModal()" type="button" class="btn btn-danger navbar-btn">Buy-Sell ETF</button>
+        <button ng-click="demoApp.openIssueCashModal()" type="button" class="btn btn-warning navbar-btn">Issue cash</button>
+        <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn .btn-success	 navbar-btn">Self Issue Etf</button>
         <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
                 class="glyphicon glyphicon-refresh"></span></button>
-    </div>
+        </div></div>
 </nav>
 
-<script type="text/ng-template" id="createETFModal.html">
-    <div class="modal-header">
+<script type="text/ng-template" id="createETFModal.html" >
+    <div class=".bg-warning">
         <h4 class="modal-title">Add new ETF Request</h4>
     </div>
+
 
     <!--div class="row">
         <div class="col-md-1"></div>
@@ -84,13 +102,15 @@
     </div-->
 
 
-    <form>
-        <div class="modal-body" >
-            <div class="form-group" ng-app="buysell" ng-controller="Example">
-                <input type="radio" id="radio1" ng-model="createETFModal.form.buysell" value="buy" tabindex="1" />
-                <label for="radio1">Buy</label>
-                <input type="radio" id="radio2" ng-model="createETFModal.form.buysell" value="sell" tabindex="2"/>
-                <label for="radio2">Sell</label>
+    <form class="bg-success">    <div class="modal-body" >
+
+    <div class="form-group">
+                <label class="radio-inline">
+                    <input type="radio" value="buy" name="btnn" class="bg-default"/>Buy</label>
+                    <label class="radio-inline">
+                <input type="radio" name="btnn"value="sell"/>Sell
+                    </label>
+
                 <a class="undo" ng-click="createETFModal.form.buysell = null">&otimes;</a>
             </div>
             <div class="form-group">
@@ -123,7 +143,7 @@
             <button ng-click="createETFModal.cancel()" type="button" class="btn btn-default">Close</button>
             <button ng-click="createETFModal.create()" type="button" class="btn btn-primary">Create ETF</button>
         </div>
-    </form>
+    </form></script>
 </script>
 
 <script type="text/ng-template" id="createETFMsgModal.html">
