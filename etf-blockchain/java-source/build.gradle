@@ -49,7 +49,7 @@ dependencies {
     cordaCompile "net.corda:corda-webserver-impl:$corda_release_version"
     cordaRuntime "net.corda:corda:$corda_release_version"
     cordaRuntime "net.corda:corda-webserver:$corda_release_version"
-
+    compile "com.google.code.gson:gson:2.8.2"
     testCompile "net.corda:corda-node-driver:$corda_release_version"
 
     // PlantUML: For the generation of sequence diagrams of the flows

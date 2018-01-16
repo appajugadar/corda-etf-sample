@@ -8,6 +8,7 @@ import static javax.ws.rs.core.Response.Status.CREATED;
 import static net.corda.finance.contracts.GetBalances.getCashBalances;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
@@ -22,10 +23,13 @@ import javax.ws.rs.core.Response;
 
 import com.cts.bfs.etf.corda.flows.APBuyEtfFLow;
 import com.cts.bfs.etf.corda.flows.APSellEtfFLow;
+import com.cts.bfs.etf.corda.flows.CashIssueFlow;
 import com.cts.bfs.etf.corda.flows.EtfIssueFlow;
 import com.cts.bfs.etf.corda.model.EtfAsset;
 import com.cts.bfs.etf.corda.model.EtfTradeRequest;
 import com.cts.bfs.etf.corda.model.TradeType;
+import com.cts.bfs.etf.corda.schema.EtfTradeSchemaV1;
+import com.cts.bfs.etf.corda.schema.PersistentEtfTrade;
 import com.cts.bfs.etf.corda.state.EtfTradeState;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -40,6 +44,8 @@ import net.corda.core.identity.AnonymousParty;
 import net.corda.core.identity.Party;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.messaging.FlowHandle;
+import net.corda.core.node.services.vault.Builder;
+import net.corda.core.node.services.vault.QueryCriteria;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.utilities.OpaqueBytes;
 import org.slf4j.Logger;
@@ -147,36 +153,6 @@ public class EtfRestApi {
         }
         }
 
-/*
-
-    @GET
-    @Path("self-issue-cash")
-    public Response selfIssueCash(
-            @QueryParam(value = "amount") int amount,
-            @QueryParam(value = "currency") String currency) {
-
-        // 1. Prepare issue request.
-        final Amount<Currency> issueAmount = new Amount<>((long) amount * 100, Currency.getInstance(currency));
-        final List<Party> notaries = rpcOps.notaryIdentities();
-        if (notaries.isEmpty()) {
-            throw new IllegalStateException("Could not find a notary.");
-        }
-        final Party notary = notaries.get(0);
-        final OpaqueBytes issueRef = OpaqueBytes.of(new byte[1]);
-        final CashIssueFlow.IssueRequest issueRequest = new CashIssueFlow.IssueRequest(issueAmount, issueRef, notary);
-
-        // 2. Start flow and wait for response.
-        try {
-            final FlowHandle<AbstractCashFlow.Result> flowHandle = rpcOps.startFlowDynamic(CashIssueFlow.class, issueRequest);
-            final AbstractCashFlow.Result result = flowHandle.getReturnValue().get();
-            final String msg = result.getStx().getTx().getOutputStates().get(0).toString();
-            return Response.status(CREATED).entity(msg).build();
-        } catch (Exception e) {
-            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
-        }
-    }
-*/
-
     @GET
     @Path("checkEtfBalance")
     public Response checkEtfBalance() {
@@ -186,24 +162,20 @@ public class EtfRestApi {
         }
         // 2. Start flow and wait for response.
         try {
-            logger.info("query etfTradeStates ");
+            logger.info("query etfTradeStates for checkEtfBalance");
             List<StateAndRef<EtfTradeState>> etfTradeStatesQueryResp = rpcOps.vaultQuery(EtfTradeState.class).getStates();
-
-
             List<EtfTradeState> etfTradeStates = new ArrayList<>();
-
             for (StateAndRef<EtfTradeState> stateAndRef : etfTradeStatesQueryResp
                  ) {
-                etfTradeStates.add(stateAndRef.getState().getData());
+                EtfTradeState etfTradeState = stateAndRef.getState().getData();
+                if(etfTradeState.getTradeType().equals("ISSUEETF")){
+                    etfTradeStates.add(stateAndRef.getState().getData());
+                }
             }
-     //       EtfBalanceResponse response = new EtfBalanceResponse(etfTradeStates);
-
-            logger.info("etfTradeStates size "+etfTradeStates.size());
-
+            logger.info("etfTradeStates for checkEtfBalance size "+etfTradeStates.size());
             final ByteArrayOutputStream out = new ByteArrayOutputStream();
             final ObjectMapper mapper = new ObjectMapper();
             mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-
             mapper.writeValue(out, etfTradeStates);
             String json = new String(out.toByteArray());
             logger.info("etfTradeStates  json "+json);
@@ -213,6 +185,38 @@ public class EtfRestApi {
         }
     }
 
+
+    @GET
+    @Path("checkCashBalance")
+    public Response checkCashBalance() {
+        final List<Party> notaries = rpcOps.notaryIdentities();
+        if (notaries.isEmpty()) {
+            throw new IllegalStateException("Could not find a notary.");
+        }
+        // 2. Start flow and wait for response.
+        try {
+            logger.info("query etfTradeStates for checkEtfBalance");
+            List<StateAndRef<EtfTradeState>> etfTradeStatesQueryResp = rpcOps.vaultQuery(EtfTradeState.class).getStates();
+            List<EtfTradeState> etfTradeStates = new ArrayList<>();
+            for (StateAndRef<EtfTradeState> stateAndRef : etfTradeStatesQueryResp
+                    ) {
+                EtfTradeState etfTradeState = stateAndRef.getState().getData();
+                if(etfTradeState.getTradeType().equals("ISSUECASH")){
+                    etfTradeStates.add(stateAndRef.getState().getData());
+                }
+            }
+            logger.info("etfTradeStates for checkCashBalance size "+etfTradeStates.size());
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            mapper.writeValue(out, etfTradeStates);
+            String json = new String(out.toByteArray());
+            logger.info("etfTradeStates  json "+json);
+            return Response.status(CREATED).entity(json).build();
+        } catch (Exception e) {
+            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
     @GET
     @Path("self-issue-etf")
@@ -225,8 +229,27 @@ public class EtfRestApi {
         }
         // 2. Start flow and wait for response.
         try {
-            final FlowHandle<SignedTransaction>  transactionFlowHandle = rpcOps.startFlowDynamic(EtfIssueFlow.class, new EtfAsset(etfName, quantity));
-            transactionFlowHandle.getReturnValue().get();
+            rpcOps.startFlowDynamic(EtfIssueFlow.class, new EtfAsset(etfName, new Long(quantity)));
+            final String msg = rpcOps.vaultQuery(EtfTradeState.class).getStates().get(0).getState().getData().toString();
+            return Response.status(CREATED).entity(msg).build();
+        } catch (Exception e) {
+            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+
+    @GET
+    @Path("self-issue-cash")
+    public Response selfIssueCash(
+            @QueryParam(value = "amount") int amount,
+            @QueryParam(value = "currency") String currency) {
+        final List<Party> notaries = rpcOps.notaryIdentities();
+        if (notaries.isEmpty()) {
+            throw new IllegalStateException("Could not find a notary.");
+        }
+        // 2. Start flow and wait for response.
+        try {
+            rpcOps.startFlowDynamic(CashIssueFlow.class, new Amount<Currency>(amount, Currency.getInstance(currency)));
             final String msg = rpcOps.vaultQuery(EtfTradeState.class).getStates().get(0).getState().getData().toString();
             return Response.status(CREATED).entity(msg).build();
         } catch (Exception e) {

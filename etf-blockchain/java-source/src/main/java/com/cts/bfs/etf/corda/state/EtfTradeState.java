@@ -1,19 +1,14 @@
 package com.cts.bfs.etf.corda.state;
 
-import com.cts.bfs.etf.corda.schema.EtfTradeSchemaV1;
-import com.cts.bfs.etf.corda.schema.PersistentEtfTrade;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import net.corda.core.contracts.Amount;
 import net.corda.core.contracts.LinearState;
 import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
-import net.corda.core.schemas.MappedSchema;
-import net.corda.core.schemas.PersistentState;
-import net.corda.core.schemas.QueryableState;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
+import java.util.Currency;
 import java.util.List;
 
 public class EtfTradeState implements LinearState {
@@ -21,13 +16,12 @@ public class EtfTradeState implements LinearState {
     private Party fromParty;
     private Party toParty;
     private String etfName;
-    private int quantity;
-    private int amount;
+    private Long quantity;
+    private Amount<Currency> amount;
     private String tradeType;
-
     private final UniqueIdentifier linearId;
 
-    public EtfTradeState(Party fromParty, Party toParty, String etfName, int quantity, int amount, String tradeType, UniqueIdentifier linearId) {
+    public EtfTradeState(Party fromParty, Party toParty, String etfName, Long quantity, Amount<Currency> amount, String tradeType, UniqueIdentifier linearId) {
         this.fromParty = fromParty;
         this.toParty = toParty;
         this.etfName = etfName;
@@ -75,19 +69,19 @@ public class EtfTradeState implements LinearState {
         return linearId;
     }
 
-    public int getQuantity() {
+    public Long getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Long quantity) {
         this.quantity = quantity;
     }
 
-    public int getAmount() {
+    public Amount<Currency> getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(Amount<Currency> amount) {
         this.amount = amount;
     }
 
