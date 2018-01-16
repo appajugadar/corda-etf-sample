@@ -1,3 +1,11 @@
 http://localhost:10007/api/issue/buy-etf-from-party?toPartyName=CUSTODIAN1&etfName=PNGGOLD&quantity=100&buyamount=100
 
 http://localhost:10016/api/issue/sell-etf-to-party?toPartyName=CUSTODIAN2&etfName=PNGGOLD&quantity=100&sellamount=100
+
+
+http://localhost:10007/api/issue/self-issue-etf?quantity=100&etfName=PNG
+http://localhost:10007/api/issue/checkEtfBalance
+
+
+http://localhost:10007/api/issue/self-issue-cash?amount=100&currency=GBP
+http://localhost:10007/api/issue/checkCashBalance
