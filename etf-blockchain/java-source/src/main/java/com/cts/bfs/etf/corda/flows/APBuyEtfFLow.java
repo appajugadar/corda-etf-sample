@@ -11,17 +11,16 @@ import com.cts.bfs.etf.corda.util.SerilazationHelper;
 
 import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndContract;
-import net.corda.core.flows.FlowException;
-import net.corda.core.flows.FlowLogic;
-import net.corda.core.flows.FlowSession;
-import net.corda.core.flows.InitiatingFlow;
-import net.corda.core.flows.StartableByRPC;
+import net.corda.core.flows.*;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
 import net.corda.core.identity.PartyAndCertificate;
+import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
+import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.UntrustworthyData;
 
 import java.util.List;
@@ -74,6 +73,7 @@ public class APBuyEtfFLow extends FlowLogic<String> {
 			etfTradeState = etfTradeState1;
 			break;
 		}
+
 		if(etfTradeState==null){
 			return "FAILED TO BUY AS NO CASH IN VAULT";
 		}
@@ -82,14 +82,21 @@ public class APBuyEtfFLow extends FlowLogic<String> {
 		final Party notary = getNotary();
 		final TransactionBuilder txBuilder = new TransactionBuilder(notary)
 				.withItems(new StateAndContract(etfTradeState, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
+		final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
+
+
 
 		FlowSession toPartySession = initiateFlow(getCustodian(custodianName));
 		UntrustworthyData<EtfTradeState> output = toPartySession.sendAndReceive(EtfTradeState.class, etfTradeState);
-
 		EtfTradeState outPutValue = SerilazationHelper.getEtfTradeState(output);
+
+		final SignedTransaction fullySignedTx = subFlow(
+				new CollectSignaturesFlow(partSignedTx, Sets.newHashSet(toPartySession), CollectSignaturesFlow.Companion.tracker()));
 
 		System.out.println("The APSellFLow : output from custodian : " + outPutValue);
 		System.out.print("The APSellFLow end " + System.currentTimeMillis());
+
+		SignedTransaction tx =  subFlow(new FinalityFlow(fullySignedTx));
 
 		return "SUCCESS";
 	}
@@ -99,6 +106,32 @@ public class APBuyEtfFLow extends FlowLogic<String> {
 				.getAllIdentities();
 
         return IdentityHelper.getPartyWithName(partyAndCertificates, custodianName);
+	}
+
+	@InitiatedBy(APBuyEtfFLow.class)
+	public static class Acceptor extends FlowLogic<SignedTransaction> {
+
+		private final FlowSession otherPartyFlow;
+
+		public Acceptor(FlowSession otherPartyFlow) {
+			this.otherPartyFlow = otherPartyFlow;
+		}
+
+		@Suspendable
+		@Override
+		public SignedTransaction call() throws FlowException {
+			class SignTxFlow extends SignTransactionFlow {
+				private SignTxFlow(FlowSession otherPartyFlow, ProgressTracker progressTracker) {
+					super(otherPartyFlow, progressTracker);
+				}
+
+				@Override
+				protected void checkTransaction(SignedTransaction stx) {
+					System.out.print("Inside check transaction for self issue etf");
+				}
+			}
+			return subFlow(new SignTxFlow(otherPartyFlow, SignTransactionFlow.Companion.tracker()));
+		}
 	}
 
 }
