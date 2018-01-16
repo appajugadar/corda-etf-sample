@@ -40,29 +40,42 @@
 
 </head>
 
-<body ng-app="demoAppModule" ng-controller="DemoAppCtrl as demoApp" class="bg-danger">
-<nav class="navbar navbar-default">
-    <div class="bg-danger">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="#">{{demoApp.thisNode}}</a>
+<body ng-app="demoAppModule" ng-controller="DemoAppCtrl as demoApp" class="bg-primary">
+<nav class="navbar navbar-primary">
+
+        <div class="navbar-primary">
+            <a class="navbar-primary" href="#">{{demoApp.thisNode}}</a>
         </div>
-        <div class="btn-group">
 
-
-        <button ng-click="demoApp.openBuySellETFModal()" type="button" class="btn btn-danger navbar-btn">Buy-Sell ETF</button>
-        <button ng-click="demoApp.openIssueCashModal()" type="button" class="btn btn-warning navbar-btn">Issue cash</button>
-        <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn .btn-success	 navbar-btn">Self Issue Etf</button>
-        <button ng-click="demoApp.refresh()" type="button" class="btn btn-default navbar-btn"><span
-                class="glyphicon glyphicon-refresh"></span></button>
-        </div></div>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    <img align="left" src="images/ETF.jpg" class="img-rounded" alt="Cinque Terre" width="150" height="100">
+                    <img align="right" src="images/cani.jpg" class="img-rounded" alt="Cinque Terre" width="150" height="100">
+                    <h3 align="center" style="font-size:50px;color:DogerBlue" class="panel-title">ETF BOOKAPP</h3>
+                </div>
+                <div align="center"  class="panel panel-info">
+                    <button ng-click="demoApp.openBuySellETFModal()" type="button" class="btn btn-info btn-lg" >Buy-Sell ETF</button>
+                    <button ng-click="demoApp.openIssueCashModal()" type="button" class="btn btn-info btn-lg">Issue cash</button>
+                    <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn btn-info btn-lg">Self Issue Etf</button>
+                    <button ng-click="demoApp.refresh()" type="button" class="btn btn-primary btn-lg"><span
+                            class="glyphicon glyphicon-refresh"></span></button>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+    </div>
 </nav>
 
 <script type="text/ng-template" id="createETFModal.html" >
-    <div class=".bg-warning">
-        <h4 class="modal-title">Add new ETF Request</h4>
+    <form class="bg-primary">
+    <div >
+        <h4 align="center" style="font-size:25px;color:DogerBlue" class="modal-title">Add new ETF Request</h4>
     </div>
 
-    <form class="bg-success">    <div class="modal-body" >
+      <div class="modal-body" >
 
     <div class="form-group">
                 <label class="radio-inline">
@@ -89,7 +102,7 @@
             </div>
             <div class="form-group">
                 <label for="createETFQuantity" class="control-label">Quantity<span class="label label-info"> (Int):</span></label>
-                <input type="text" ng-model="createETFModal.form.quantity" ng-pattern="" class="form-control" id="createETFQuantity">
+                <input type="text" ng-model="createETFModal.form.quantity" class="form-control" ng-init="createETFModal.form.quantity='0'" id="createETFQuantity">
             </div>
         <div class="form-group">
 
@@ -99,16 +112,15 @@
         </div>
             <div ng-show="createETFModal.formError" class="form-group">
                 <div class="alert alert-danger" role="alert">
-                    <span class="glyphicon glyphicon-ex
-                    clamation-sign" aria-hidden="true"></span>
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
                     <span class="sr-only">Error:</span>
                     Enter valid ETF creation parameters
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button ng-click="createETFModal.cancel()" type="button" class="btn btn-default">Close</button>
-            <button ng-click="createETFModal.create()" type="button" class="btn btn-primary">Submit</button>
+            <button ng-click="createETFModal.cancel()" type="button" class="btn btn-info">Close</button>
+            <button ng-click="createETFModal.create()" type="button" class="btn btn-info">Submit</button>
         </div>
     </form></script>
 </script>
@@ -120,10 +132,10 @@
 </script>
 
 <script type="text/ng-template" id="issueCashModal.html">
-    <div class="modal-header">
-        <h4 class="modal-title">Self-issue cash</h4>
+    <form class="bg-primary">
+        <div class="modal-header">
+            <h4 align="center" style="font-size:25px;color:DogerBlue"  class="modal-title">Self-issue cash</h4>
     </div>
-    <form>
         <div class="modal-body">
             <div class="form-group">
                 <label for="issueCashCurrency" class="control-label">Currency (ISO code):</label>
@@ -156,10 +168,10 @@
 
 
 <script type="text/ng-template" id="selfIssueEtfModal.html">
+    <form class="bg-primary">
     <div class="modal-header">
-        <h4 class="modal-title">Self-issue Etf</h4>
+        <h4 align="center" style="font-size:25px;color:DogerBlue" class="modal-title">Self-issue Etf</h4>
     </div>
-    <form>
         <div class="modal-body">
             <div class="form-group">
                 <label for="selfIssueEtf" class="control-label">ETF Name:</label>
@@ -178,8 +190,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button ng-click="selfIssueEtfModal.cancel()" type="button" class="btn btn-default">Close</button>
-            <button ng-click="selfIssueEtfModal.issue()" type="button" class="btn btn-primary">Issue self ETF</button>
+            <button ng-click="selfIssueEtfModal.cancel()" type="button" class="btn btn-info">Close</button>
+            <button ng-click="selfIssueEtfModal.issue()" type="button" class="btn btn-info">Issue self ETF</button>
         </div>
     </form>
 </script>
@@ -192,10 +204,10 @@
 
 
 <script type="text/ng-template" id="transferModal.html">
-    <div class="modal-header">
-        <h4 class="modal-title">Transfer ETF</h4>
+    <form class="bg-primary">
+        <div class="modal-header">
+            <h4 align="center" style="font-size:25px;color:DogerBlue"  class="modal-title">Transfer ETF</h4>
     </div>
-    <form>
         <div class="modal-body">
             <div class="form-group">
                 <label for="transferCounterparty" class="control-label">Counter-party:</label>
@@ -212,8 +224,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button ng-click="transferModal.cancel()" type="button" class="btn btn-default">Close</button>
-            <button ng-click="transferModal.transfer()" type="button" class="btn btn-primary">Transfer</button>
+            <button ng-click="transferModal.cancel()" type="button" class="btn btn-info">Close</button>
+            <button ng-click="transferModal.transfer()" type="button" class="btn btn-info">Transfer</button>
         </div>
     </form>
 </script>
@@ -225,10 +237,10 @@
 </script>
 
 <script type="text/ng-template" id="settleModal.html">
-    <div class="modal-header">
-        <h4 class="modal-title">Settle ETF</h4>
-    </div>
-    <form>
+    <form class="bg-primary">
+        <div class="modal-header">
+            <h4 align="center" style="font-size:25px;color:DogerBlue"   class="modal-title">Settle ETF</h4>
+       </div>
         <div class="modal-body">
             <div class="form-group">
                 <label for="settleCurrency" class="control-label">Currency (ISO code):</label>
@@ -247,8 +259,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button ng-click="settleModal.cancel()" type="button" class="btn btn-default">Close</button>
-            <button ng-click="settleModal.settle()" type="button" class="btn btn-primary">Settle</button>
+            <button ng-click="settleModal.cancel()" type="button" class="btn btn-info">Close</button>
+            <button ng-click="settleModal.settle()" type="button" class="btn btn-info">Settle</button>
         </div>
     </form>
 </script>
@@ -262,7 +274,7 @@
 <div class="row">
     <div class="col-md-1"></div>
     <div class="col-md-10">
-        <div class="panel panel-primary">
+        <div class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">Cash balances:</h3>
             </div>
@@ -288,7 +300,7 @@
 <div class="row">
     <div class="col-md-1"></div>
     <div class="col-md-10">
-        <div class="panel panel-primary">
+        <div class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">Etf balances:</h3>
             </div>
@@ -323,7 +335,7 @@
 <div class="row">
     <div class="col-md-1"></div>
     <div class="col-md-10">
-        <div ng-show="!demoApp.etfRecorded.length" class="panel panel-primary">
+        <div ng-show="!demoApp.etfRecorded.length" class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">There are no recorded ETFs</h3>
             </div>
