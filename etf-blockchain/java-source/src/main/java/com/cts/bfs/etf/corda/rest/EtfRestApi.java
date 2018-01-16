@@ -223,6 +223,10 @@ public class EtfRestApi {
     public Response selfIssueEtf(
             @QueryParam(value = "quantity") int quantity,
             @QueryParam(value = "etfName") String etfName) {
+
+        logger.info("quantity::"+quantity);
+        logger.info("etfName::"+etfName);
+
         final List<Party> notaries = rpcOps.notaryIdentities();
         if (notaries.isEmpty()) {
             throw new IllegalStateException("Could not find a notary.");
@@ -255,5 +259,25 @@ public class EtfRestApi {
         } catch (Exception e) {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
         }
+    }
+    @GET
+    @Path("issue-etf-buy-sell")
+    public Response issueETFBuySell(
+            @QueryParam(value = "buysell") String buysell,
+            @QueryParam(value = "counterparty") String counterparty,
+            @QueryParam(value = "etfName") String etfName,
+            @QueryParam(value = "currency") String currency,
+            @QueryParam(value = "quantity") int quantity,
+            @QueryParam(value = "amount") int amount){
+
+        logger.info("buysell::"+buysell);
+        logger.info("counterparty::"+counterparty);
+        logger.info("etfName::"+etfName);
+        logger.info("currency::"+currency);
+        logger.info("quantity::"+quantity);
+        logger.info("amount::"+amount);
+
+        return Response.status(CREATED).entity("TEST issueETFBuySell SUCCESS").build();
+
     }
 }
