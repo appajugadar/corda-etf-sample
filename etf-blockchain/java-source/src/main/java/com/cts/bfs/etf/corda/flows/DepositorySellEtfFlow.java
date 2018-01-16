@@ -1,65 +1,86 @@
 package com.cts.bfs.etf.corda.flows;
 
 import java.util.Currency;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import com.cts.bfs.etf.corda.contract.EtfIssueContract;
 import com.cts.bfs.etf.corda.model.EtfTradeRequest;
 import com.cts.bfs.etf.corda.model.EtfTradeResponse;
+import com.cts.bfs.etf.corda.state.EtfTradeState;
+import com.cts.bfs.etf.corda.util.BalanceHelper;
 import com.cts.bfs.etf.corda.util.SerilazationHelper;
 
 import co.paralleluniverse.fibers.Suspendable;
 import net.corda.core.contracts.Amount;
-import net.corda.core.flows.FlowException;
-import net.corda.core.flows.FlowSession;
-import net.corda.core.flows.InitiatedBy;
-import net.corda.core.flows.InitiatingFlow;
+import net.corda.core.contracts.Command;
+import net.corda.core.contracts.StateAndContract;
+import net.corda.core.flows.*;
+import net.corda.core.identity.AbstractParty;
+import net.corda.core.identity.Party;
+import net.corda.core.transactions.SignedTransaction;
+import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.UntrustworthyData;
+
+import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CONTRACT_ID;
 
 
 @InitiatedBy(CustodianSellEtfFlow.class)
 @InitiatingFlow
-public class DepositorySellEtfFlow extends AbstractDepositoryFlow {
+public class DepositorySellEtfFlow extends FlowLogic<SignedTransaction> {
+
+    private FlowSession flowSession;
 
     public DepositorySellEtfFlow(FlowSession flowSession) {
-        super(flowSession);
-        System.out.println("**Inside depository called by "+flowSession.getCounterparty());
-        AbstractDepositoryFlow.sellParty.put(flowSession.getCounterparty().getName().getOrganisation(), flowSession );
+        this.flowSession = flowSession;
     }
+
 
     @Suspendable
-    public String call() throws FlowException {
-        System.out.print("The depository start "+System.currentTimeMillis());
+    public SignedTransaction call() throws FlowException {
+        System.out.print("The depository start " + System.currentTimeMillis());
         System.out.println("**In call method for depository flow");
 
-        UntrustworthyData<EtfTradeRequest> inputFromAP = getFlowSession().receive(EtfTradeRequest.class); // Etf
-        EtfTradeRequest input =  SerilazationHelper.getEtfTradeRequest(inputFromAP);
-        System.out.println("**In call method for depository flow -->"+input);
+        UntrustworthyData<EtfTradeState> inputFromCustodian = flowSession.receive(EtfTradeState.class); // Input is Cash
+        EtfTradeState etfTradeStateEtfInput = SerilazationHelper.getEtfTradeState(inputFromCustodian);
+        etfTradeStateEtfInput.setTradeStatus("UNMATCHED");
 
-        AbstractDepositoryFlow.etf.put("PNG", input.getQuantity());
+//Persist in depositories vault
+        SignedTransaction partSignedTx = persistEtfTradeStateToVault(etfTradeStateEtfInput);
 
-        Amount<Currency> amount= null;
+        List<EtfTradeState> etfTradeStates = new BalanceHelper().getBalance(getServiceHub(), "BUY");
 
-        for (String key : AbstractDepositoryFlow.cash.keySet()) {
-            amount = AbstractDepositoryFlow.cash.get(key); //Output to Buyer AP
-            System.out.println("**In call method for depository flow -->"+input);
+        if(etfTradeStates.size() > 0){
+            //send back matched trade to buyer
+            EtfTradeState etfSellState = etfTradeStates.get(0);
+
+            etfTradeStateEtfInput.setTradeStatus("MATCHED");
+            etfTradeStateEtfInput.setAmount(etfTradeStates.get(0).getAmount());
+            partSignedTx =persistEtfTradeStateToVault(etfTradeStateEtfInput);
+
+            etfSellState.setTradeStatus("MATCHED");
+            persistEtfTradeStateToVault(etfSellState);
+            flowSession.send(etfSellState);
+            //call buyer flow
+        }else{
+            //wait to receive from seller flow
+            UntrustworthyData<EtfTradeState> responseFromDepositorySellFlow = flowSession.receive(EtfTradeState.class);
+            EtfTradeState etfTradeResponse = SerilazationHelper.getEtfTradeState(responseFromDepositorySellFlow);
+            flowSession.send(etfTradeResponse);
         }
 
-        if (amount != null) {
-            System.out.println("**Found match for request -->"+input);
-            EtfTradeResponse etfTradeResponse = new EtfTradeResponse(input.getToPartyName(),input.getEtfName(),input.getQuantity(),input.getAmount());
-            getFlowSession().send(etfTradeResponse);
-            System.out.println("**Sending response back to sellers custodian -->"+etfTradeResponse);
-            for (String flowKey:             AbstractDepositoryFlow.buyParty.keySet()) {
-                FlowSession flowSession1 = AbstractDepositoryFlow.buyParty.get(flowKey);
-                System.out.println("**Sending response back to buyers custodian -->"+etfTradeResponse);
-                if(flowSession1!=null)
-                    flowSession1.send(etfTradeResponse);
-                System.out.println("**In call method for depository flow -->"+input);
-            }
-        }
-
-        System.out.print("The Depository end "+System.currentTimeMillis());
-
-        return "SUCCESS";
-
+        getLogger().info("completed depository buy flow");
+        return partSignedTx;
     }
+
+    private SignedTransaction persistEtfTradeStateToVault(EtfTradeState etfTradeStateCashInput) throws FlowException {
+        final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
+        final Command<EtfIssueContract.Commands.SelfIssueEtf> txCommand = new Command<>(new EtfIssueContract.Commands.SelfIssueEtf(),
+                etfTradeStateCashInput.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
+        final TransactionBuilder txBuilder = new TransactionBuilder(notary)
+                .withItems(new StateAndContract(etfTradeStateCashInput, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
+        final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
+        return  subFlow(new FinalityFlow(partSignedTx));
+    }
+
 }

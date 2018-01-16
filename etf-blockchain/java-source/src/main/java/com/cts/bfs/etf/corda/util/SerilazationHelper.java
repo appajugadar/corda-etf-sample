@@ -3,6 +3,7 @@ package com.cts.bfs.etf.corda.util;
 import com.cts.bfs.etf.corda.model.EtfTradeRequest;
 import com.cts.bfs.etf.corda.model.EtfTradeResponse;
 
+import com.cts.bfs.etf.corda.state.EtfTradeState;
 import net.corda.core.flows.FlowException;
 import net.corda.core.utilities.UntrustworthyData;
 
@@ -22,6 +23,16 @@ public class SerilazationHelper {
             @Override
             public EtfTradeRequest validate(EtfTradeRequest data) throws FlowException {
                 System.out.println("**In validate method for custodian flow received data "+data);
+                return data;
+            }
+        });
+    }
+
+
+    public static EtfTradeState getEtfTradeState(UntrustworthyData<EtfTradeState> output) throws FlowException {
+        return output.unwrap(new UntrustworthyData.Validator<EtfTradeState, EtfTradeState>() {
+            @Override
+            public EtfTradeState validate(EtfTradeState data) throws FlowException {
                 return data;
             }
         });

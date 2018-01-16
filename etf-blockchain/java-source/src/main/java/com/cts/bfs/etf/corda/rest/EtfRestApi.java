@@ -81,35 +81,6 @@ public class EtfRestApi {
                 .map(it -> it.getLegalIdentities().get(0).getName().getOrganisation())
                 .collect(toList()));
     }
-/*
-
-    @GET
-    @Path("owed-per-currency")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Map<Currency, Long> owedPerCurrency() {
-        return rpcOps.vaultQuery(Obligation.class).getStates()
-                .stream()
-                .filter(it -> it.getState().getData().getLender() != myIdentity)
-                .map(it -> it.getState().getData().getAmount())
-                .collect(groupingBy(
-                        Amount::getToken, summingLong(Amount::getQuantity)
-                ));
-    }
-
-    @GET
-    @Path("obligations")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StateAndRef<Obligation>> obligations() {
-        return rpcOps.vaultQuery(Obligation.class).getStates();
-    }
-
-    @GET
-    @Path("cash")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<StateAndRef<Cash.State>> cash() {
-        return rpcOps.vaultQuery(Cash.State.class).getStates();
-    }
-*/
 
     @GET
     @Path("cash-balances")
@@ -125,9 +96,12 @@ public class EtfRestApi {
             @QueryParam(value = "etfName") String etfName,
             @QueryParam(value = "quantity") int quantity,
             @QueryParam(value = "buyamount") int buyAmount) {
-        EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, quantity, buyAmount, TradeType.BUY);
+        logger.info("initiateBuyEtf -->");
+        EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, Long.valueOf(quantity+""), Long.valueOf(buyAmount+""), TradeType.BUY);
         try {
+            logger.info("calling flow-->");
             final FlowHandle<String> flowHandle = rpcOps.startFlowDynamic(APBuyEtfFLow.class,etfTradeRequest,"CUSTODIAN1");
+            logger.info("received resp from flow-->");
             final String result = flowHandle.getReturnValue().get();
             return Response.status(CREATED).entity(result).build();
         } catch (Exception e) {
@@ -142,7 +116,8 @@ public class EtfRestApi {
             @QueryParam(value = "etfName") String etfName,
             @QueryParam(value = "quantity") int quantity, @QueryParam(value = "sellamount") int sellAmount) {
 
-        EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, quantity, sellAmount, TradeType.SELL);
+        logger.info("initiateSellEtf -->");
+        EtfTradeRequest etfTradeRequest = new EtfTradeRequest(toPartyName, etfName, Long.valueOf(quantity+""), Long.valueOf(sellAmount+""), TradeType.SELL);
         try {
             final FlowHandle<String> flowHandle = rpcOps.startFlowDynamic(
                     APSellEtfFLow.class,etfTradeRequest,"CUSTODIAN2");

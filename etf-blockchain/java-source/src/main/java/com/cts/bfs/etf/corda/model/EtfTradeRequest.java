@@ -7,11 +7,11 @@ public class EtfTradeRequest {
 
 	private String toPartyName;
 	private String etfName;
-	private int quantity;
-	private int amount;
+	private Long quantity;
+	private Long amount;
 	private TradeType tradeType;
 
-    public EtfTradeRequest(String toPartyName, String etfName, int quantity, int amount, TradeType tradeType) {
+    public EtfTradeRequest(String toPartyName, String etfName, Long quantity, Long amount, TradeType tradeType) {
         this.toPartyName = toPartyName;
         this.etfName = etfName;
         this.quantity = quantity;
@@ -35,19 +35,19 @@ public class EtfTradeRequest {
         this.etfName = etfName;
     }
 
-    public int getQuantity() {
+    public Long getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Long quantity) {
         this.quantity = quantity;
     }
 
-    public int getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 

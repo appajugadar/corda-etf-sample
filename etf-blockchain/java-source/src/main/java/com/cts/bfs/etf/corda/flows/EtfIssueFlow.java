@@ -73,12 +73,13 @@ public class EtfIssueFlow extends AbstractIssueFlow {
         System.out.print("etfTradeState -->> "+etfTradeState);
         final Command<EtfIssueContract.Commands.SelfIssueEtf> txCommand = new Command<>(new EtfIssueContract.Commands.SelfIssueEtf(),
                 etfTradeState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
-        final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
+
 
 
         System.out.println("Inside EtfIssue flow BUILDING tx");
         // Step 2. build tx.
         progressTracker.setCurrentStep(BUILDING);
+        final Party notary = getServiceHub().getNetworkMapCache().getNotaryIdentities().get(0);
         final TransactionBuilder txBuilder = new TransactionBuilder(notary)
                 .withItems(new StateAndContract(etfTradeState, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
 
@@ -92,14 +93,13 @@ public class EtfIssueFlow extends AbstractIssueFlow {
         getLogger().info("Verified TX");
 
 
-        System.out.println("Inside EtfIssue flow sign tx");
         // step 4 Sign the transaction.
         progressTracker.setCurrentStep(SIGNING);
         final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
-
         getLogger().info("Signed TX");
 
         System.out.println("Inside EtfIssue flow finalize tx");
+
         // Stage 6. finalise tx;
         progressTracker.setCurrentStep(FINALISING_TRANSACTION);
         // Notarise and record the transaction in both parties' vaults.

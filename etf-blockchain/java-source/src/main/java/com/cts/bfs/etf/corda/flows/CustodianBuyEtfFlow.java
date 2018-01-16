@@ -1,9 +1,11 @@
 package com.cts.bfs.etf.corda.flows;
 
 import static com.cts.bfs.etf.corda.util.SerilazationHelper.getEtfTradeRequest;
+import static com.cts.bfs.etf.corda.util.SerilazationHelper.getEtfTradeState;
 
 import com.cts.bfs.etf.corda.model.EtfTradeRequest;
 import com.cts.bfs.etf.corda.model.EtfTradeResponse;
+import com.cts.bfs.etf.corda.state.EtfTradeState;
 import com.cts.bfs.etf.corda.util.IdentityHelper;
 import com.cts.bfs.etf.corda.util.SerilazationHelper;
 
@@ -24,6 +26,7 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
 	public CustodianBuyEtfFlow(FlowSession flowSession) {
 		this.flowSession = flowSession;
 		this.dipositoryName = "DEPOSITORY";
+
 		System.out.println("**Inside custodian called by " + flowSession.getCounterparty());
 	}
 
@@ -31,19 +34,23 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
 	public String call() throws FlowException {
 		System.out.print("The custodian start " + System.currentTimeMillis());
 		System.out.println("**In call method for custodian flow");
-		UntrustworthyData<EtfTradeRequest> inputFromAP = flowSession.receive(EtfTradeRequest.class);
 
-		EtfTradeRequest sendToDipository = getEtfTradeRequest(inputFromAP);
+		UntrustworthyData<EtfTradeState> inputFromAP = flowSession.receive(EtfTradeState.class);
 
-		System.out.println("**In call method for custodian flow -->" + sendToDipository);
+		EtfTradeState etfTradeStateFromAp = getEtfTradeState(inputFromAP);
+        etfTradeStateFromAp.setFromParty(getServiceHub().getMyInfo().getLegalIdentities().get(0));
+        etfTradeStateFromAp.setToParty(getDipository(dipositoryName));
+
+        System.out.println("**In call method for custodian flow -->" + etfTradeStateFromAp);
 
 		FlowSession toPartySession = initiateFlow(getDipository(dipositoryName));
-		UntrustworthyData<EtfTradeResponse> output = toPartySession.sendAndReceive(EtfTradeResponse.class,
-				sendToDipository);
-		EtfTradeResponse out = SerilazationHelper.getEtfTradeResponse(output);
+		UntrustworthyData<EtfTradeState> output = toPartySession.sendAndReceive(EtfTradeState.class,
+				etfTradeStateFromAp);
+        EtfTradeState outputFromDepository = SerilazationHelper.getEtfTradeState(output);
 
-		System.out.println("**In call method for custodian flow output from depository-->" + out);
-		flowSession.send(out);
+		System.out.println("**In call method for custodian flow output from depository-->" + outputFromDepository);
+		flowSession.send(outputFromDepository);
+
 		System.out.print("The custodian end " + System.currentTimeMillis());
 
 		return " BUY-CUSTODIAN-SUCCESS ";
