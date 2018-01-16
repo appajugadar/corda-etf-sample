@@ -7,6 +7,8 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static net.corda.finance.contracts.GetBalances.getCashBalances;
 
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
@@ -25,8 +27,13 @@ import com.cts.bfs.etf.corda.model.EtfAsset;
 import com.cts.bfs.etf.corda.model.EtfTradeRequest;
 import com.cts.bfs.etf.corda.model.TradeType;
 import com.cts.bfs.etf.corda.state.EtfTradeState;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.ImmutableMap;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.corda.core.contracts.Amount;
 import net.corda.core.contracts.StateAndRef;
 import net.corda.core.identity.AnonymousParty;
@@ -35,12 +42,16 @@ import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.messaging.FlowHandle;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.utilities.OpaqueBytes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Path("issue")
 public class EtfRestApi {
 
     private final CordaRPCOps rpcOps;
     private final Party myIdentity;
+
+    private static final Logger logger = LoggerFactory.getLogger(EtfRestApi.class);
 
     public EtfRestApi(CordaRPCOps rpcOps) {
         this.rpcOps = rpcOps;
@@ -166,6 +177,41 @@ public class EtfRestApi {
     }
 */
 
+    @GET
+    @Path("checkEtfBalance")
+    public Response checkEtfBalance() {
+        final List<Party> notaries = rpcOps.notaryIdentities();
+        if (notaries.isEmpty()) {
+            throw new IllegalStateException("Could not find a notary.");
+        }
+        // 2. Start flow and wait for response.
+        try {
+            logger.info("query etfTradeStates ");
+            List<StateAndRef<EtfTradeState>> etfTradeStatesQueryResp = rpcOps.vaultQuery(EtfTradeState.class).getStates();
+
+
+            List<EtfTradeState> etfTradeStates = new ArrayList<>();
+
+            for (StateAndRef<EtfTradeState> stateAndRef : etfTradeStatesQueryResp
+                 ) {
+                etfTradeStates.add(stateAndRef.getState().getData());
+            }
+     //       EtfBalanceResponse response = new EtfBalanceResponse(etfTradeStates);
+
+            logger.info("etfTradeStates size "+etfTradeStates.size());
+
+            final ByteArrayOutputStream out = new ByteArrayOutputStream();
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+
+            mapper.writeValue(out, etfTradeStates);
+            String json = new String(out.toByteArray());
+            logger.info("etfTradeStates  json "+json);
+            return Response.status(CREATED).entity(json).build();
+        } catch (Exception e) {
+            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
 
 
     @GET
@@ -182,8 +228,6 @@ public class EtfRestApi {
             final FlowHandle<SignedTransaction>  transactionFlowHandle = rpcOps.startFlowDynamic(EtfIssueFlow.class, new EtfAsset(etfName, quantity));
             transactionFlowHandle.getReturnValue().get();
             final String msg = rpcOps.vaultQuery(EtfTradeState.class).getStates().get(0).getState().getData().toString();
-
-
             return Response.status(CREATED).entity(msg).build();
         } catch (Exception e) {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();

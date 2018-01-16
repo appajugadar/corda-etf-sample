@@ -1,13 +1,17 @@
 package net.corda.examples.iou;
 
+import static net.corda.core.crypto.CryptoUtils.entropyToKeyPair;
 import static net.corda.testing.TestConstants.getDUMMY_BANK_A;
 import static net.corda.testing.TestConstants.getDUMMY_BANK_B;
 import static net.corda.testing.TestConstants.getDUMMY_NOTARY;
 import static net.corda.testing.driver.Driver.driver;
 
+import java.math.BigInteger;
+import java.security.KeyPair;
 import java.util.List;
 import java.util.Set;
 
+import net.corda.core.identity.CordaX500Name;
 import net.corda.testing.CoreTestUtils;
 import net.corda.testing.driver.WebserverHandle;
 import org.junit.Assert;
@@ -39,8 +43,13 @@ public class IntegrationTest {
     @Test
     public void runDriverTest() {
         Party notary = getDUMMY_NOTARY();
-        Party bankA = getDUMMY_BANK_A();
-        Party bankB = getDUMMY_BANK_B();
+
+        KeyPair DUMMY_AP1_KEY = entropyToKeyPair(BigInteger.valueOf(40));
+        Party ap1 = new Party(new CordaX500Name("AP1", "London", "GB"), DUMMY_AP1_KEY.getPublic());
+
+        KeyPair DUMMY_CUSTODIAN_KEY = entropyToKeyPair(BigInteger.valueOf(50));
+        Party custodian1 = new Party(new CordaX500Name("CUSTODIAN1", "London", "GB"), DUMMY_CUSTODIAN_KEY.getPublic());
+
         Set<ServiceInfo> notaryServices = ImmutableSet.of(new ServiceInfo(SimpleNotaryService.Companion.getType(), null));
 
         driver(new DriverParameters().setIsDebug(true).setStartNodesInProcess(true), dsl -> {
@@ -48,8 +57,8 @@ public class IntegrationTest {
             // has completed startup. Then these are all resolved with getOrThrow which returns the NodeHandle list.
             List<CordaFuture<NodeHandle>> handles = ImmutableList.of(
                     dsl.startNode(new NodeParameters().setProvidedName(notary.getName()).setAdvertisedServices(notaryServices)),
-                    dsl.startNode(new NodeParameters().setProvidedName(bankA.getName())),
-                    dsl.startNode(new NodeParameters().setProvidedName(bankB.getName()))
+                    dsl.startNode(new NodeParameters().setProvidedName(ap1.getName())),
+                    dsl.startNode(new NodeParameters().setProvidedName(custodian1.getName()))
             );
 
             try {
@@ -70,8 +79,8 @@ public class IntegrationTest {
                 dsl.waitForAllNodesToFinish();
 
 
-                Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(bankA.getName()).getName(), bankA.getName());
-                Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(bankB.getName()).getName(), bankB.getName());
+                Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(ap1.getName()).getName(), ap1.getName());
+                Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(custodian1.getName()).getName(), custodian1.getName());
                 Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(notary.getName()).getName(), notary.getName());
             } catch (Exception e) {
                 throw new RuntimeException("Caught exception during test", e);
