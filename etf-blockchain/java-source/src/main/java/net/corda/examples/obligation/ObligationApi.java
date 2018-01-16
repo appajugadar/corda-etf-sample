@@ -10,8 +10,6 @@ import net.corda.core.messaging.FlowHandle;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.utilities.OpaqueBytes;
 import net.corda.examples.obligation.flows.IssueObligation;
-import net.corda.examples.obligation.flows.SettleObligation;
-import net.corda.examples.obligation.flows.TransferObligation;
 import net.corda.finance.contracts.asset.Cash;
 import net.corda.finance.flows.AbstractCashFlow;
 import net.corda.finance.flows.CashIssueFlow;
@@ -154,7 +152,7 @@ public class ObligationApi {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
-
+/*
     @GET
     @Path("transfer-obligation")
     public Response transferObligation(
@@ -202,5 +200,5 @@ public class ObligationApi {
         } catch (Exception e) {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
         }
-    }
+    }*/
 }

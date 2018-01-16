@@ -8,7 +8,10 @@ import static net.corda.testing.driver.Driver.driver;
 import java.util.List;
 import java.util.Set;
 
+import net.corda.testing.CoreTestUtils;
+import net.corda.testing.driver.WebserverHandle;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -21,8 +24,18 @@ import net.corda.nodeapi.internal.ServiceInfo;
 import net.corda.testing.driver.DriverParameters;
 import net.corda.testing.driver.NodeHandle;
 import net.corda.testing.driver.NodeParameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class IntegrationTest {
+
+    private static final Logger log = LoggerFactory.getLogger(IntegrationTest.class);
+
+    @Before
+    public void setUp() {
+        CoreTestUtils.setCordappPackages( "com.cts.bfs.etf.corda.contract");
+    }
+
     @Test
     public void runDriverTest() {
         Party notary = getDUMMY_NOTARY();
@@ -48,6 +61,15 @@ public class IntegrationTest {
                 // started and can communicate. This is a very basic test, in practice tests would be starting flows,
                 // and verifying the states in the vault and other important metrics to ensure that your CorDapp is working
                 // as intended.
+
+                CordaFuture<WebserverHandle> webHandleA = dsl.startWebserver(nodeAHandle);
+                CordaFuture<WebserverHandle> webHandleB = dsl.startWebserver(nodeBHandle);
+
+                log.info("Webserver A address: " + webHandleA.get().getListenAddress());
+
+                dsl.waitForAllNodesToFinish();
+
+
                 Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(bankA.getName()).getName(), bankA.getName());
                 Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(bankB.getName()).getName(), bankB.getName());
                 Assert.assertEquals(notaryHandle.getRpc().wellKnownPartyFromX500Name(notary.getName()).getName(), notary.getName());

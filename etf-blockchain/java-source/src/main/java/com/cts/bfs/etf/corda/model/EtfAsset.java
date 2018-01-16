@@ -1,4 +1,5 @@
-package net.corda.examples.obligation;
+package com.cts.bfs.etf.corda.model;
+
 
 import net.corda.core.serialization.CordaSerializable;
 

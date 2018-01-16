@@ -14,7 +14,6 @@ import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.ProgressTracker.Step;
 import net.corda.examples.obligation.Obligation;
 import net.corda.examples.obligation.ObligationContract;
-import net.corda.examples.obligation.flows.ObligationBaseFlow.SignTxFlowNoChecking;
 
 import java.security.PublicKey;
 import java.time.Duration;
@@ -129,7 +128,7 @@ public class IssueObligation {
         @Suspendable
         @Override
         public SignedTransaction call() throws FlowException {
-            final SignedTransaction stx = subFlow(new SignTxFlowNoChecking(otherFlow, SignTransactionFlow.Companion.tracker()));
+            final SignedTransaction stx = subFlow(new AbstractIssueFlow.SignTxFlowNoChecking(otherFlow, SignTransactionFlow.Companion.tracker()));
             return waitForLedgerCommit(stx.getId());
         }
     }
