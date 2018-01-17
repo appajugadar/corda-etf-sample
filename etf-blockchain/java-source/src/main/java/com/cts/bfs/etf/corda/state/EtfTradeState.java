@@ -19,6 +19,8 @@ public class EtfTradeState implements LinearState {
     private Long quantity;
     private Amount<Currency> amount;
     private String tradeType;
+
+    private String tradeStatus;
     private final UniqueIdentifier linearId;
 
     public EtfTradeState(Party fromParty, Party toParty, String etfName, Long quantity, Amount<Currency> amount, String tradeType, UniqueIdentifier linearId) {
@@ -85,6 +87,13 @@ public class EtfTradeState implements LinearState {
         this.amount = amount;
     }
 
+    public String getTradeStatus() {
+        return tradeStatus;
+    }
+
+    public void setTradeStatus(String tradeStatus) {
+        this.tradeStatus = tradeStatus;
+    }
     @NotNull
     @Override
     public List<AbstractParty> getParticipants() {

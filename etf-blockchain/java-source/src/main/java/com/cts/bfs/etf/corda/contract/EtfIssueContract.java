@@ -13,6 +13,10 @@ public class EtfIssueContract implements Contract {
 
         }
 
+        class EtfBuyCommand extends TypeOnlyCommandData implements com.cts.bfs.etf.corda.contract.EtfIssueContract.Commands {
+
+        }
+
 
     }
 
