@@ -79,9 +79,9 @@
 
     <div class="form-group">
                 <label class="radio-inline">
-                    <input type="radio" value="buy" name="btnn" class="bg-default"/>Buy</label>
+                    <input type="radio" value="buy" name="btnn" ng-model="createETFModal.form.buysell" class="bg-default"/>Buy</label>
                     <label class="radio-inline">
-                <input type="radio" name="btnn"value="sell"/>Sell
+                <input type="radio" name="btnn" ng-model="createETFModal.form.buysell" value="sell"/>Sell
                     </label>
 
                 <!--a class="undo" ng-click="createETFModal.form.buysell = null">&otimes;</a-->
