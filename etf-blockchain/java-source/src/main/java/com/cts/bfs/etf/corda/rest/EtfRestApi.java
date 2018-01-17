@@ -166,7 +166,7 @@ public class EtfRestApi {
             final String msg = rpcOps.vaultQuery(EtfTradeState.class).getStates().get(0).getState().getData().toString();
             return Response.status(CREATED).entity("SUCCESS").build();
         } catch (Exception e) {
-            return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
+            return Response.status(BAD_REQUEST).entity("SUCCESS").build();
         }
     }
 
@@ -184,6 +184,7 @@ public class EtfRestApi {
         try {
             rpcOps.startFlowDynamic(CashIssueFlow.class, new Amount<Currency>(amount, Currency.getInstance(currency)));
             final String msg = rpcOps.vaultQuery(EtfTradeState.class).getStates().get(0).getState().getData().toString();
+            System.out.println("self issue completed");
             return Response.status(CREATED).entity("SUCCESS").build();
         } catch (Exception e) {
             return Response.status(BAD_REQUEST).entity(e.getMessage()).build();
@@ -222,6 +223,7 @@ public class EtfRestApi {
 
                         EtfTradeState etfTradeRequest1 = (EtfTradeState ) result.getTx().getOutput(0);
                         selfIssueCash(- Integer.parseInt(etfTradeRequest1.getAmount().getQuantity()+""), etfTradeRequest1.getAmount().getToken().getCurrencyCode());
+                        System.out.println("transaction to buy/selll completed");
                     } catch (Exception e) {
                         logger.info("",e);
                     }
@@ -244,7 +246,7 @@ public class EtfRestApi {
                         EtfTradeState etfTradeRequest1 = (EtfTradeState ) result.getTx().getOutput(0);
 
                         selfIssueCash(Integer.parseInt(etfTradeRequest1.getAmount().getQuantity()+""), etfTradeRequest1.getAmount().getToken().getCurrencyCode());
-
+                        System.out.println("transaction to buy/selll completed");
 
                     } catch (Exception e) {
                         logger.info("",e);

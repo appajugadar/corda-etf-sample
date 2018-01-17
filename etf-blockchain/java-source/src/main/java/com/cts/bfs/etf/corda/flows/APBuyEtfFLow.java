@@ -19,13 +19,14 @@ import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.UntrustworthyData;
 
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CONTRACT_ID;
 
 @InitiatingFlow
 @StartableByRPC
-public class APBuyEtfFLow extends FlowLogic<SignedTransaction> {
+public class APBuyEtfFLow extends AbstractApFlow {
 
     private EtfTradeRequest etfTradeRequest;
     private String custodianName;
@@ -77,11 +78,17 @@ public class APBuyEtfFLow extends FlowLogic<SignedTransaction> {
 
         System.out.println("The APBuyFLow : received etf trade : " + outPutValue);
 
-        SignedTransaction tx = persistEtfTrade(etfTradeState);
+        final Command<EtfIssueContract.Commands.SelfIssueEtf> txCommand = new Command<>(new EtfIssueContract.Commands.SelfIssueEtf(),
+                etfTradeState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
+        final TransactionBuilder txBuilder = new TransactionBuilder(getNotary())
+                .withItems(new StateAndContract(etfTradeState, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
+        final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
+
+        //SignedTransaction tx = persistEtfTrade(etfTradeState);
 
         System.out.println("The APBuyFLow end " + System.currentTimeMillis());
 
-        return tx;
+        return partSignedTx;
     }
 
     private SignedTransaction persistEtfTrade(EtfTradeState etfTradeState) throws FlowException {

@@ -68,11 +68,9 @@ public class EtfIssueFlow extends AbstractIssueFlow {
                 null, "ISSUEETF",
                 new UniqueIdentifier());
 
-
         System.out.print("etfTradeState -->> " + etfTradeState);
         final Command<EtfIssueContract.Commands.SelfIssueEtf> txCommand = new Command<>(new EtfIssueContract.Commands.SelfIssueEtf(),
                 etfTradeState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
-
 
         System.out.println("Inside EtfIssue flow BUILDING tx");
         // Step 2. build tx.

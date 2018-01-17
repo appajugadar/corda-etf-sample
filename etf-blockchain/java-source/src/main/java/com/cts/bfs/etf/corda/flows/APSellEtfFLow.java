@@ -21,13 +21,16 @@ import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.UntrustworthyData;
 
 import java.util.Currency;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CONTRACT_ID;
 
 @InitiatingFlow
 @StartableByRPC
-public class APSellEtfFLow extends FlowLogic<SignedTransaction> {
+public class APSellEtfFLow extends AbstractApFlow {
+    public static HashSet<EtfTradeState> etfTradeBuyRequests = new HashSet<EtfTradeState>(); //
+    public static HashSet<EtfTradeState> etfTradeSellRequests = new HashSet<EtfTradeState>(); //
 
     private EtfTradeRequest etfTradeRequest;
 
@@ -71,9 +74,13 @@ public class APSellEtfFLow extends FlowLogic<SignedTransaction> {
         System.out.print("Received trade from custodian : " + outPutValue);
 
 //
-        SignedTransaction tx = persistEtfTrade(etfTradeState);
-        //
-        return tx;//"SUCCESS";
+        final Command<EtfIssueContract.Commands.SelfIssueEtf> txCommand = new Command<>(new EtfIssueContract.Commands.SelfIssueEtf(),
+                etfTradeState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
+        final TransactionBuilder txBuilder = new TransactionBuilder(getNotary())
+                .withItems(new StateAndContract(etfTradeState, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
+        final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
+
+        return partSignedTx;//"SUCCESS";
     }
 
 
