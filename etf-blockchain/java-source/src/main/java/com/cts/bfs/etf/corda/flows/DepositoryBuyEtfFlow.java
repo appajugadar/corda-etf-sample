@@ -12,6 +12,7 @@ import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
+import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.UntrustworthyData;
 
 import java.util.Currency;
@@ -29,51 +30,49 @@ import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CON
 
 @InitiatedBy(CustodianBuyEtfFlow.class)
 @InitiatingFlow
-public class DepositoryBuyEtfFlow extends FlowLogic<SignedTransaction> {
+public class DepositoryBuyEtfFlow extends AbstractDepositoryFlow {
+
 	private FlowSession flowSession;
 
 	public DepositoryBuyEtfFlow(FlowSession flowSession) {
+		super(flowSession);
 		this.flowSession = flowSession;
 	}
 
 	@Suspendable
-	public SignedTransaction call() throws FlowException {
-		System.out.print("The depository start " + System.currentTimeMillis());
-		System.out.println("**In call method for depository flow");
+	public String call() throws FlowException {
+		System.out.println("The DepositoryBuyEtfFlow start " + System.currentTimeMillis());
 
 		UntrustworthyData<EtfTradeState> inputFromCustodian = flowSession.receive(EtfTradeState.class); // Input is Cash
 		EtfTradeState etfTradeStateCashInput = SerilazationHelper.getEtfTradeState(inputFromCustodian);
 		etfTradeStateCashInput.setTradeStatus("UNMATCHED");
+		System.out.println("DepositoryBuyEtfFlow got input from custodian "+etfTradeStateCashInput);
 
-//Persist in depositories vault
-		SignedTransaction partSignedTx = persistEtfTradeStateToVault(etfTradeStateCashInput);
-
-		List<EtfTradeState> etfTradeStates = new BalanceHelper().getBalance(getServiceHub(), "SELL");
-
-
-		if(etfTradeStates.size() > 0){
-			//send back matched trade to buyer
-			EtfTradeState etfSellState = etfTradeStates.get(0);
-
+		if(etfTradeSellRequests.size()>0){
+			EtfTradeState etfSellState = (EtfTradeState) etfTradeSellRequests.toArray()[0];
 			etfTradeStateCashInput.setTradeStatus("MATCHED");
-			etfTradeStateCashInput.setEtfName(etfTradeStates.get(0).getEtfName());
-			etfTradeStateCashInput.setQuantity(etfTradeStates.get(0).getQuantity());
-			partSignedTx =persistEtfTradeStateToVault(etfTradeStateCashInput);
-
+			etfTradeStateCashInput.setEtfName(etfSellState.getEtfName());
+			etfTradeStateCashInput.setQuantity(etfSellState.getQuantity());
+			etfTradeSellRequests.remove(etfTradeStateCashInput);
 			etfSellState.setTradeStatus("MATCHED");
-			persistEtfTradeStateToVault(etfSellState);
+			System.out.println("Sending back response to Cust1 as match found in vault");
 			flowSession.send(etfSellState);
-			//call buyer flow
-
 		}else{
 			//wait to receive from seller flow
+			etfTradeBuyRequests.add(etfTradeStateCashInput);
 			UntrustworthyData<EtfTradeState> responseFromDepositorySellFlow = flowSession.receive(EtfTradeState.class);
 			EtfTradeState etfTradeResponse = SerilazationHelper.getEtfTradeState(responseFromDepositorySellFlow);
+			System.out.println("Received trade from seller "+etfTradeResponse);
+
+			System.out.println("Sending back response to buyer custodian");
+			etfTradeSellRequests.remove(etfTradeStateCashInput);
+
 			flowSession.send(etfTradeResponse);
 		}
 
+		System.out.println("Depo buy flow end");
 		getLogger().info("completed depository buy flow");
-		return partSignedTx;
+		return "SUCCESS";
 
 	}
 
@@ -88,5 +87,30 @@ public class DepositoryBuyEtfFlow extends FlowLogic<SignedTransaction> {
 				.withItems(new StateAndContract(etfTradeStateCashInput, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
 		final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
 		return  subFlow(new FinalityFlow(partSignedTx));
+	}
+
+	public static class DepositorySignatureAcceptorFlow extends FlowLogic<SignedTransaction> {
+
+		private final FlowSession otherPartyFlow;
+
+		public DepositorySignatureAcceptorFlow(FlowSession otherPartyFlow) {
+			this.otherPartyFlow = otherPartyFlow;
+		}
+
+		@Suspendable
+		@Override
+		public SignedTransaction call() throws FlowException {
+			class SignTxFlow extends SignTransactionFlow {
+				private SignTxFlow(FlowSession otherPartyFlow, ProgressTracker progressTracker) {
+					super(otherPartyFlow, progressTracker);
+				}
+
+				@Override
+				protected void checkTransaction(SignedTransaction stx) {
+					System.out.print("Inside check transaction for self issue etf");
+				}
+			}
+			return subFlow(new SignTxFlow(otherPartyFlow, SignTransactionFlow.Companion.tracker()));
+		}
 	}
 }

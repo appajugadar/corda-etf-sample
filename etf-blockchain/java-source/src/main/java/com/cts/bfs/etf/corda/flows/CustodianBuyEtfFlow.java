@@ -48,8 +48,9 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
 		System.out.println("**In call method for custodian flow");
 
 		UntrustworthyData<EtfTradeState> inputFromAP = flowSession.receive(EtfTradeState.class);
-
 		EtfTradeState etfTradeStateFromAp = getEtfTradeState(inputFromAP);
+        System.out.println("**In call method for custodian flow");
+
         etfTradeStateFromAp.setFromParty(getServiceHub().getMyInfo().getLegalIdentities().get(0));
         etfTradeStateFromAp.setToParty(getDipository(dipositoryName));
 
@@ -58,30 +59,28 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
         Party custodianParty = getDipository(dipositoryName);
         Party myParty = getServiceHub().getMyInfo().getLegalIdentities().get(0);
 
+//
+        UntrustworthyData<EtfTradeState> output = flowSession.sendAndReceive(EtfTradeState.class,etfTradeStateFromAp);
+        /*EtfTradeState outputFromDepository = SerilazationHelper.getEtfTradeState(output);
+        flowSession.send(outputFromDepository);
+
         final Command<EtfIssueContract.Commands.EtfBuyCommand> txCommand = new Command<>(new EtfIssueContract.Commands.EtfBuyCommand(),
                 ImmutableList.of(custodianParty,myParty).stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
-        final Party notary = getNotary();
-        final TransactionBuilder txBuilder = new TransactionBuilder(notary)
-                .withItems(new StateAndContract(etfTradeStateFromAp, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
+        final TransactionBuilder txBuilder = new TransactionBuilder(getNotary()).withItems(new StateAndContract(etfTradeStateFromAp, SELF_ISSUE_ETF_CONTRACT_ID),txCommand);
+
+*//*
+        final SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(partSignedTx, Sets.newHashSet(flowSession), CollectSignaturesFlow.Companion.tracker()));
+        System.out.println("**In call method for custodian flow output from depository-->" + etfTradeStateFromAp);
+
+*//*
         final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
+        txBuilder.verify(getServiceHub());
+        subFlow(new FinalityFlow(partSignedTx));*/
+        System.out.print("Sending back buyed etf to AP " );
 
 
-        FlowSession toPartySession = initiateFlow(getDipository(dipositoryName));
-		UntrustworthyData<EtfTradeState> output = toPartySession.sendAndReceive(EtfTradeState.class,
-				etfTradeStateFromAp);
-        EtfTradeState outputFromDepository = SerilazationHelper.getEtfTradeState(output);
 
-		System.out.println("**In call method for custodian flow output from depository-->" + outputFromDepository);
-		flowSession.send(outputFromDepository);
-
-       final SignedTransaction fullySignedTx = subFlow(
-                new CollectSignaturesFlow(partSignedTx, Sets.newHashSet(toPartySession), CollectSignaturesFlow.Companion.tracker()));
-
-        System.out.print("The APSellFLow end " + System.currentTimeMillis());
-        SignedTransaction tx =  subFlow(new FinalityFlow(fullySignedTx));
-        System.out.print("The custodian end " + System.currentTimeMillis());
-
-		return " BUY-CUSTODIAN-SUCCESS ";
+        return " BUY-CUSTODIAN-SUCCESS ";
 	}
 
 	private Party getDipository(String dipositoryName) {
@@ -96,12 +95,11 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
     }
 
 
-    @InitiatedBy(CustodianBuyEtfFlow.class)
-    public static class Acceptor extends FlowLogic<SignedTransaction> {
+    public static class CustodianSignatureAcceptorFlow extends FlowLogic<SignedTransaction> {
 
         private final FlowSession otherPartyFlow;
 
-        public Acceptor(FlowSession otherPartyFlow) {
+        public CustodianSignatureAcceptorFlow(FlowSession otherPartyFlow) {
             this.otherPartyFlow = otherPartyFlow;
         }
 

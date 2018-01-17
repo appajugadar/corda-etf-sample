@@ -10,6 +10,7 @@ import java.util.List;
 public class BalanceHelper {
 
    public List<EtfTradeState> getBalance(ServiceHub serviceHub, String type){
+       System.out.print("checking balance for "+type);
         List<StateAndRef<EtfTradeState>> etfTradeStatesQueryResp = serviceHub.getVaultService().queryBy(EtfTradeState.class).getStates();
         List<EtfTradeState> etfTradeStates = new ArrayList<>();
         for (StateAndRef<EtfTradeState> stateAndRef : etfTradeStatesQueryResp
@@ -19,6 +20,7 @@ public class BalanceHelper {
                 etfTradeStates.add(stateAndRef.getState().getData());
             }
         }
+       System.out.print("balance for "+type+" is "+etfTradeStates.size());
         return etfTradeStates;
     }
 }

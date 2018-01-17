@@ -1,5 +1,6 @@
 package com.cts.bfs.etf.corda.flows;
 
+import com.cts.bfs.etf.corda.contract.CashIssueContract;
 import com.cts.bfs.etf.corda.contract.EtfIssueContract;
 import com.cts.bfs.etf.corda.model.EtfTradeRequest;
 import com.cts.bfs.etf.corda.model.EtfTradeResponse;
@@ -12,6 +13,7 @@ import com.cts.bfs.etf.corda.util.SerilazationHelper;
 import co.paralleluniverse.fibers.Suspendable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
+import net.corda.core.contracts.Amount;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndContract;
 import net.corda.core.flows.*;
@@ -20,9 +22,14 @@ import net.corda.core.identity.Party;
 import net.corda.core.identity.PartyAndCertificate;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
+import net.corda.core.utilities.OpaqueBytes;
 import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.UntrustworthyData;
+import net.corda.finance.contracts.asset.Cash;
+import net.corda.finance.flows.CashIssueFlow;
 
+import java.util.Currency;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,9 +38,6 @@ import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CON
 @InitiatingFlow
 @StartableByRPC
 public class APBuyEtfFLow extends FlowLogic<String> {
-/*
-	Party otherParty;
-	Party myself;*/
 
 	private EtfTradeRequest etfTradeRequest;
 	private String custodianName;
@@ -42,8 +46,6 @@ public class APBuyEtfFLow extends FlowLogic<String> {
 	public APBuyEtfFLow(EtfTradeRequest etfTradeRequest, String custodianName) {
 		this.etfTradeRequest = etfTradeRequest;
 		this.custodianName = custodianName;
-	//	this.otherParty = getPartyByName(custodianName);
-	//	this.myself = getServiceHub().getMyInfo().getLegalIdentities().get(0);
 		System.out.println("The input is " + etfTradeRequest + " for custodian " + custodianName);
 	}
 
@@ -63,6 +65,7 @@ public class APBuyEtfFLow extends FlowLogic<String> {
 		Party myParty = getServiceHub().getMyInfo().getLegalIdentities().get(0);
 
 		System.out.println("The APBuyFLow is initiated time " + System.currentTimeMillis());
+
 		EtfTradeState etfTradeState =null;
 		for(EtfTradeState etfTradeState1: new BalanceHelper().getBalance(getServiceHub(),"ISSUECASH")) {
 			etfTradeState1.setFromParty(myParty);
@@ -77,26 +80,33 @@ public class APBuyEtfFLow extends FlowLogic<String> {
 		if(etfTradeState==null){
 			return "FAILED TO BUY AS NO CASH IN VAULT";
 		}
-		final Command<EtfIssueContract.Commands.EtfBuyCommand> txCommand = new Command<>(new EtfIssueContract.Commands.EtfBuyCommand(),
-				ImmutableList.of(custodianParty,myParty).stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
-		final Party notary = getNotary();
-		final TransactionBuilder txBuilder = new TransactionBuilder(notary)
-				.withItems(new StateAndContract(etfTradeState, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
-		final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
 
-
+		System.out.println("The APBuyFLow : sending etf buy trade request to custodian : " );
 
 		FlowSession toPartySession = initiateFlow(getCustodian(custodianName));
 		UntrustworthyData<EtfTradeState> output = toPartySession.sendAndReceive(EtfTradeState.class, etfTradeState);
 		EtfTradeState outPutValue = SerilazationHelper.getEtfTradeState(output);
 
-		final SignedTransaction fullySignedTx = subFlow(
-				new CollectSignaturesFlow(partSignedTx, Sets.newHashSet(toPartySession), CollectSignaturesFlow.Companion.tracker()));
+		System.out.println("The APBuyFLow : received etf trade : " +outPutValue);
+		/*System.out.println("The APBuyFLow : got resp to custodian : " );
 
-		System.out.println("The APSellFLow : output from custodian : " + outPutValue);
-		System.out.print("The APSellFLow end " + System.currentTimeMillis());
+		final Command<EtfIssueContract.Commands.EtfBuyCommand> txCommand = new Command<>(new EtfIssueContract.Commands.EtfBuyCommand(),
+				ImmutableList.of(custodianParty,myParty).stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
+		final TransactionBuilder txBuilder = new TransactionBuilder(getNotary()).withItems(new StateAndContract(outPutValue, SELF_ISSUE_ETF_CONTRACT_ID),txCommand);
+		txBuilder.verify(getServiceHub());
+		final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
+		final SignedTransaction fullySignedTx = subFlow(new CollectSignaturesFlow(partSignedTx, Sets.newHashSet(toPartySession), CollectSignaturesFlow.Companion.tracker()));
 
-		SignedTransaction tx =  subFlow(new FinalityFlow(fullySignedTx));
+		System.out.println("The APBuyFLow : output from custodian : " + outPutValue);
+		System.out.println("The APBuyFLow end " + System.currentTimeMillis());
+		subFlow(new FinalityFlow(fullySignedTx));
+		getLogger().info("Notarised TX");
+		System.out.print("The APBuyFLow end " + System.currentTimeMillis());
+*/
+		System.out.println("The APBuyFLow end " + System.currentTimeMillis());
+
+		getLogger().info("Notarised TX");
+
 
 		return "SUCCESS";
 	}
@@ -108,7 +118,7 @@ public class APBuyEtfFLow extends FlowLogic<String> {
         return IdentityHelper.getPartyWithName(partyAndCertificates, custodianName);
 	}
 
-	@InitiatedBy(APBuyEtfFLow.class)
+	//@InitiatedBy(APBuyEtfFLow.class)
 	public static class Acceptor extends FlowLogic<SignedTransaction> {
 
 		private final FlowSession otherPartyFlow;
@@ -133,5 +143,4 @@ public class APBuyEtfFLow extends FlowLogic<String> {
 			return subFlow(new SignTxFlow(otherPartyFlow, SignTransactionFlow.Companion.tracker()));
 		}
 	}
-
 }

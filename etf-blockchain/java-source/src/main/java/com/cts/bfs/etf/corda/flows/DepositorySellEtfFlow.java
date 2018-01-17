@@ -27,50 +27,46 @@ import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CON
 
 @InitiatedBy(CustodianSellEtfFlow.class)
 @InitiatingFlow
-public class DepositorySellEtfFlow extends FlowLogic<SignedTransaction> {
+public class DepositorySellEtfFlow extends AbstractDepositoryFlow {
 
     private FlowSession flowSession;
 
     public DepositorySellEtfFlow(FlowSession flowSession) {
+        super(flowSession);
         this.flowSession = flowSession;
     }
 
 
     @Suspendable
-    public SignedTransaction call() throws FlowException {
-        System.out.print("The depository start " + System.currentTimeMillis());
-        System.out.println("**In call method for depository flow");
+    public String call() throws FlowException {
+        System.out.println("The DepositorySellEtfFlow start " + System.currentTimeMillis());
 
         UntrustworthyData<EtfTradeState> inputFromCustodian = flowSession.receive(EtfTradeState.class); // Input is Cash
-        EtfTradeState etfTradeStateEtfInput = SerilazationHelper.getEtfTradeState(inputFromCustodian);
-        etfTradeStateEtfInput.setTradeStatus("UNMATCHED");
+        EtfTradeState etfTradeStateCashInput = SerilazationHelper.getEtfTradeState(inputFromCustodian);
+        etfTradeStateCashInput.setTradeStatus("UNMATCHED");
+        System.out.println("DepositoryBuyEtfFlow got input from custodian "+etfTradeStateCashInput);
 
-//Persist in depositories vault
-        SignedTransaction partSignedTx = persistEtfTradeStateToVault(etfTradeStateEtfInput);
-
-        List<EtfTradeState> etfTradeStates = new BalanceHelper().getBalance(getServiceHub(), "BUY");
-
-        if(etfTradeStates.size() > 0){
-            //send back matched trade to buyer
-            EtfTradeState etfSellState = etfTradeStates.get(0);
-
-            etfTradeStateEtfInput.setTradeStatus("MATCHED");
-            etfTradeStateEtfInput.setAmount(etfTradeStates.get(0).getAmount());
-            partSignedTx =persistEtfTradeStateToVault(etfTradeStateEtfInput);
-
+        if(etfTradeBuyRequests.size()>0){
+            EtfTradeState etfSellState = (EtfTradeState) etfTradeBuyRequests.toArray()[0];
+            etfTradeStateCashInput.setTradeStatus("MATCHED");
+            etfTradeStateCashInput.setEtfName(etfSellState.getEtfName());
+            etfTradeStateCashInput.setQuantity(etfSellState.getQuantity());
+            etfTradeBuyRequests.remove(etfTradeStateCashInput);
             etfSellState.setTradeStatus("MATCHED");
-            persistEtfTradeStateToVault(etfSellState);
+            //	persistEtfTradeStateToVault(etfSellState);
+            System.out.println("Sending back response to custodian as match found in vault");
             flowSession.send(etfSellState);
-            //call buyer flow
         }else{
             //wait to receive from seller flow
+            etfTradeBuyRequests.add(etfTradeStateCashInput);
             UntrustworthyData<EtfTradeState> responseFromDepositorySellFlow = flowSession.receive(EtfTradeState.class);
             EtfTradeState etfTradeResponse = SerilazationHelper.getEtfTradeState(responseFromDepositorySellFlow);
+            System.out.println("Sending back response to Cust1 as trade received from seller");
+            etfTradeBuyRequests.remove(etfTradeStateCashInput);
             flowSession.send(etfTradeResponse);
         }
-
-        getLogger().info("completed depository buy flow");
-        return partSignedTx;
+        System.out.println("The DepositorySellEtfFlow end ");
+        return "SUCCESS";
     }
 
     private SignedTransaction persistEtfTradeStateToVault(EtfTradeState etfTradeStateCashInput) throws FlowException {
