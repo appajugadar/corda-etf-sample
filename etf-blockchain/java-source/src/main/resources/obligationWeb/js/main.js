@@ -68,6 +68,19 @@ angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', func
 
         selfIssueEtfModal.result.then(() => {}, () => {});
     };
+    /** Displays the cash issuance modal. */
+    demoApp.openSelfIssueCashModal = () => {
+        const selfIssueCashModal = $uibModal.open({
+            templateUrl: 'selfIssueCashModal.html',
+            controller: 'SelfIssueCashModalCtrl',
+            controllerAs: 'selfIssueEtfModal',
+            resolve: {
+                apiBaseURL: () => apiBaseURL
+            }
+        });
+
+        issueCashModal.result.then(() => {}, () => {});
+    };
     /** Displays the IOU transfer modal. */
     demoApp.openTransferModal = (id) => {
         const transferModal = $uibModal.open({
@@ -102,9 +115,13 @@ angular.module('demoAppModule', ['ui.bootstrap']).controller('DemoAppCtrl', func
     /** Refreshes the front-end. */
     demoApp.refresh = () => {
         // Update the list of IOUs.
-        $http.get(apiBaseURL + "obligations").then((response) => demoApp.ious =
-            Object.keys(response.data).map((key) => response.data[key].state.data));
+        $http.get(apiBaseURL + "checkCashBalance").then((response) => demoApp.checkCashBalance =
+            response.data);
 
+        // Update the cash balances.
+        $http.get(apiBaseURL + "checkEtfBalance").then((response) => demoApp.checkEtfBalance =
+            response.data);
+            
         // Update the cash balances.
         $http.get(apiBaseURL + "cash-balances").then((response) => demoApp.cashBalances =
             response.data);

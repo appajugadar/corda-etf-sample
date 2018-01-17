@@ -44,7 +44,7 @@
 <nav class="navbar navbar-primary">
 
         <div class="navbar-primary">
-            <a class="navbar-primary" href="#">{{demoApp.thisNode}}</a>
+            <a class="navbar-primary" href="#"><font color="white"> {{demoApp.thisNode}}</font>></a>
         </div>
 
     <div class="row">
@@ -54,7 +54,7 @@
                 <div class="panel-heading">
                     <img align="left" src="images/ETF.jpg" class="img-rounded" alt="Cinque Terre" width="150" height="100">
                     <img align="right" src="images/cani.jpg" class="img-rounded" alt="Cinque Terre" width="150" height="100">
-                    <h3 align="center" style="font-size:50px;color:DogerBlue" class="panel-title">ETF BOOKAPP</h3>
+                    <h3 align="center" style="font-size:50px;color:DogerBlue" class="panel-title">ETF BOOKING APP</h3>
                 </div>
                 <div align="center"  class="panel panel-info">
                     <button ng-click="demoApp.openBuySellETFModal()" type="button" class="btn btn-info btn-lg" >Buy-Sell ETF</button>
@@ -106,8 +106,8 @@
             </div>
         <div class="form-group">
 
-            <label for="createETFAmount" class="control-label">Amount<span class="label label-info"> (Int):</span></label>
-          <p>  <div>{{ createETFModal.form.quantity*10 }} </p>
+            <label for="createETFAmount" class="control-label">Amount<span class="label label-info"> (Int)</span><span class="label label-success"> (NAV 10 GBP) :</span></label>
+          <p> {{ createETFModal.form.quantity*10 }} </p>
             <!--input  type="text" ng-model="createETFModal.form.amount" class="form-control" id="createETFAmount" value="{{ createETFModal.form.quantity }}" -->
         </div>
             <div ng-show="createETFModal.formError" class="form-group">
@@ -127,7 +127,7 @@
 
 <script type="text/ng-template" id="createETFMsgModal.html">
     <div class="modal-body" id="create-etf-modal-body">
-        {{ createETFMsgModal.message }}
+       <p align="center"><font color="blue"> {{ createETFMsgModal.message }}<font/><p/>
     </div>
 </script>
 
@@ -162,7 +162,7 @@
 
 <script type="text/ng-template" id="issueCashMsgModal.html">
     <div class="modal-body" id="issue-cash-modal-body">
-        {{ issueCashMsgModal.message }}
+        <p align="center"><font color="blue"> {{ issueCashMsgModal.message }}<font/><p/>
     </div>
 </script>
 
@@ -198,7 +198,7 @@
 
 <script type="text/ng-template" id="selfIssueEtfMsgModal.html">
     <div class="modal-body" id="self-issue-etf-modal-body">
-        {{ selfIssueEtfMsgModal.message }}
+        <p align="center"><font color="blue"> {{ selfIssueEtfMsgModal.message }}<font/><p/>
     </div>
 </script>
 
@@ -232,7 +232,7 @@
 
 <script type="text/ng-template" id="transferMsgModal.html">
     <div class="modal-body" id="transfer-modal-body">
-        {{ transferMsgModal.message }}
+        <p align="center"><font color="blue"> {{ transferMsgModal.message }}<font/><p/>
     </div>
 </script>
 
@@ -267,7 +267,7 @@
 
 <script type="text/ng-template" id="settleMsgModal.html">
     <div class="modal-body" id="settle-modal-body">
-        {{ settleMsgModal.message }}
+        <p align="center"><font color="blue"> {{ settleMsgModal.message }}<font/><p/>
     </div>
 </script>
 
@@ -276,18 +276,20 @@
     <div class="col-md-10">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <h3 class="panel-title">Cash balances:</h3>
+                <h3 class="panel-title"><strong>Cash Holding:</strong></h3>
             </div>
             <div class="panel-body">
                 <table class="table">
                     <thead>
-                    <tr>
+                    <tr bgcolor="#3399ff" class="primary" >
                         <th>Amount</th>
+                        <th>Currency</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="cash in demoApp.cashBalances">
-                        <td class="vert-align">{{cash}}</td>
+                    <tr class="info" ng-repeat="cash in demoApp.checkCashBalance">
+                        <td class="vert-align"><font color="blue"> {{cash.amount.quantity}}</font></td>
+                        <td class="vert-align"><font color="blue"> {{cash.amount.token}}</font></td>
                     </tr>
                     </tbody>
                 </table>
@@ -302,27 +304,20 @@
     <div class="col-md-10">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <h3 class="panel-title">Etf balances:</h3>
+                <h3 class="panel-title"><strong>ETF Holding:</strong></h3>
             </div>
             <div class="panel-body">
                 <table class="table">
-                    <thead>
-                    <tr>
+
+                    <tr  bgcolor="#3399ff"  >
                         <th>Etf Name</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr ng-repeat="cash in demoApp.etfName">
-                        <td class="vert-align">{{etfName}}</td>
-                    </tr>
-                    </tbody>
-                    <tr>
                         <th>Quantity</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="cash in demoApp.quantity">
-                        <td class="vert-align">{{quantity}}</td>
+                    <tr class="info" ng-repeat="cash in demoApp.checkEtfBalance">
+                        <td class="vert-align"><font color="blue"> {{cash.etfName}}</font></td>
+                        <td class="vert-align"><font color="blue"> {{cash.quantity}}</font></td>
                     </tr>
                     </tbody>
                 </table>
@@ -332,39 +327,35 @@
     </div>
 </div>
 
-<div class="row">
+<!--div class="row">
     <div class="col-md-1"></div>
     <div class="col-md-10">
-        <div ng-show="!demoApp.etfRecorded.length" class="panel panel-info">
+        <div ng-show="!demoApp.checkEtfBalance.length" class="panel panel-info">
             <div class="panel-heading">
                 <h3 class="panel-title">There are no recorded ETFs</h3>
             </div>
             <div class="panel-body">Use the "Create ETF" button to send an ETF to a peer.</div>
         </div>
-        <div ng-show="demoApp.etfRecorded.length" class="panel panel-primary">
+        <div ng-show="demoApp.checkEtfBalance.length" class="panel panel-primary">
             <div class="panel-heading">
                 <h3 class="panel-title">Recorded ETFs:</h3>
             </div>
             <div class="panel-body">
                 <table class="table">
                     <thead>
-                    <tr>
-                        <th>From</th>
-                        <th>To</th>
+                    <tr class="primary">
                         <th>ETF Name</th>
                         <th>Quantity</th>
                         <th>Amount</th>
-                        <th>Paid</th>
-                        <th>Actions</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr ng-repeat="etf in demoApp.etfRecorded">
-                        <td class="vert-align">{{etf.lender.substring(0, 10)}}</td>
-                        <td class="vert-align">{{etf.borrower.substring(0, 10)}}</td>
+                    <tr class="primary" ng-repeat="etf in demoApp.checkEtfBalance">
+                        <!--td class="vert-align">{{etf.lender.substring(0, 10)}}</td>
+                        <td class="vert-align">{{etf.borrower.substring(0, 10)}}</td
                         <td class="vert-align">{{etf.amount}}</td>
-                        <td class="vert-align">{{etf.paid}}</td>
-                        <td>
+                        <td class="vert-align">{{etf.etfName}}</td>
+                        <td class="info">
                             <div class="btn-group" role="group">
                                 <button ng-click="demoApp.openEtfTransferModal(etf.linearId.id)" type="button" class="btn btn-primary">Transfer
                                 </button>
@@ -379,6 +370,6 @@
         </div>
         <div class="col-md-1"></div>
     </div>
-</div>
+</div-->
 </body>
 </html>
