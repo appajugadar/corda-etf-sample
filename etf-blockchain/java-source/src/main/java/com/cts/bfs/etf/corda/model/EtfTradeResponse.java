@@ -15,7 +15,7 @@ public class EtfTradeResponse {
         this.etfName = etfName;
         this.quantity = quantity;
         this.amount = amount;
-       }
+    }
 
     public String getToPartyName() {
         return toPartyName;

@@ -22,17 +22,6 @@ import static net.corda.finance.utils.StateSumming.sumCash;
 public class ObligationContract implements Contract {
     public static final String OBLIGATION_CONTRACT_ID = "net.corda.examples.obligation.ObligationContract";
 
-    public interface Commands extends CommandData {
-        class Issue extends TypeOnlyCommandData implements Commands {
-        }
-
-        class Transfer extends TypeOnlyCommandData implements Commands {
-        }
-
-        class Settle extends TypeOnlyCommandData implements Commands {
-        }
-    }
-
     @Override
     public void verify(LedgerTransaction tx) {
         final CommandWithParties<Commands> command = requireSingleCommand(tx.getCommands(), Commands.class);
@@ -132,5 +121,16 @@ public class ObligationContract implements Contract {
             req.using("Both lender and borrower together only must sign obligation settle transaction.", signers.equals(keysFromParticipants(inputObligation)));
             return null;
         });
+    }
+
+    public interface Commands extends CommandData {
+        class Issue extends TypeOnlyCommandData implements Commands {
+        }
+
+        class Transfer extends TypeOnlyCommandData implements Commands {
+        }
+
+        class Settle extends TypeOnlyCommandData implements Commands {
+        }
     }
 }

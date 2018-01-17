@@ -7,6 +7,14 @@ import java.util.Objects;
 @CordaSerializable
 public class EtfAsset {
 
+    private String etfName;
+    private int quantity;
+
+    public EtfAsset(String etfName, int quantity) {
+        this.etfName = etfName;
+        this.quantity = quantity;
+    }
+
     public int getQuantity() {
         return quantity;
     }
@@ -15,20 +23,12 @@ public class EtfAsset {
         this.quantity = quantity;
     }
 
-    private String etfName;
-    private int quantity;
-
     public String getEtfName() {
         return etfName;
     }
 
     public void setEtfName(String etfName) {
         this.etfName = etfName;
-    }
-
-    public EtfAsset(String etfName, int quantity) {
-        this.etfName = etfName;
-        this.quantity = quantity;
     }
 
     @Override

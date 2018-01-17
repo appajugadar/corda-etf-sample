@@ -34,7 +34,7 @@ public class PersistentEtfTrade extends PersistentState {
 
     public PersistentEtfTrade(String fromParty, String toParty, String etfName, int quantity,
                               int amount, String tradeType, UUID linearId) {
-        System.out.println("fromParty "+fromParty+" toParty "+toParty+" etfName "+etfName+" quantity "+quantity+" amount "+amount+" tradeType "+tradeType+" linearId "+linearId);
+        System.out.println("fromParty " + fromParty + " toParty " + toParty + " etfName " + etfName + " quantity " + quantity + " amount " + amount + " tradeType " + tradeType + " linearId " + linearId);
         this.fromParty = fromParty;
         this.toParty = toParty;
         this.etfName = etfName;

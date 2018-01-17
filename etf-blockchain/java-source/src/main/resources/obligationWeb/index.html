@@ -59,7 +59,7 @@
                 <div align="center"  class="panel panel-info">
                     <button ng-click="demoApp.openBuySellETFModal()" type="button" class="btn btn-info btn-lg" >Buy-Sell ETF</button>
                     <button ng-click="demoApp.openIssueCashModal()" type="button" class="btn btn-info btn-lg">Issue cash</button>
-                    <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn btn-info btn-lg">Self Issue Etf</button>
+                    <button ng-click="demoApp.openSelfIssueEtfModal()" type="button" class="btn btn-info btn-lg">Issue Etf</button>
                     <button ng-click="demoApp.refresh()" type="button" class="btn btn-primary btn-lg"><span
                             class="glyphicon glyphicon-refresh"></span></button>
                 </div>
@@ -170,7 +170,7 @@
 <script type="text/ng-template" id="selfIssueEtfModal.html">
     <form class="bg-primary">
     <div class="modal-header">
-        <h4 align="center" style="font-size:25px;color:DogerBlue" class="modal-title">Self-issue Etf</h4>
+        <h4 align="center" style="font-size:25px;color:DogerBlue" class="modal-title">issue Etf</h4>
     </div>
         <div class="modal-body">
             <div class="form-group">
@@ -191,7 +191,7 @@
         </div>
         <div class="modal-footer">
             <button ng-click="selfIssueEtfModal.cancel()" type="button" class="btn btn-info">Close</button>
-            <button ng-click="selfIssueEtfModal.issue()" type="button" class="btn btn-info">Issue self ETF</button>
+            <button ng-click="selfIssueEtfModal.issue()" type="button" class="btn btn-info">Issue ETF</button>
         </div>
     </form>
 </script>

@@ -32,44 +32,38 @@ public class EtfBuyInitiatorFlow extends AbstractIssueFlow {
     private final ProgressTracker progressTracker = new ProgressTracker(
             EtfProgressTracker.INITIALISING, EtfProgressTracker.BUILDING, EtfProgressTracker.SIGNING, EtfProgressTracker.COLLECTING, EtfProgressTracker.FINALISING
     );
+    private Party fromParty;// AP
+    private Party toParty;
+    private EtfAsset etfAsset;
+    private Amount<Currency> amount;
+    private String partyRole;
+    private boolean anonymous;
+
+    public EtfBuyInitiatorFlow(AbstractParty fromParty, AbstractParty toParty, EtfAsset etfAsset) {
+
+        //TODO
+        if (this.getOurIdentity().getName().getCommonName().toUpperCase().contains("AP")) {
+            partyRole = "AP";
+        }
+
+        if (this.getOurIdentity().getName().getCommonName().toUpperCase().contains("CST")) {
+            partyRole = "CST";
+        }
+
+        if (this.getOurIdentity().getName().getCommonName().toUpperCase().contains("DTCC")) {
+            partyRole = "CLR";
+        }
+
+        this.etfAsset = etfAsset;
+    }
 
     @Override
     public ProgressTracker getProgressTracker() {
         return progressTracker;
     }
 
-    private Party fromParty;// AP
-
-    private Party toParty;
-
-    private EtfAsset etfAsset;
-
-    private Amount<Currency> amount;
-
-    private String partyRole;
-
-    private boolean anonymous;
-
     public String getPartyRole() {
         return partyRole;
-    }
-
-    public EtfBuyInitiatorFlow (AbstractParty fromParty, AbstractParty toParty, EtfAsset etfAsset) {
-
-        //TODO
-        if(this.getOurIdentity().getName().getCommonName().toUpperCase().contains("AP")){
-            partyRole="AP";
-        }
-
-        if(this.getOurIdentity().getName().getCommonName().toUpperCase().contains("CST")){
-            partyRole="CST";
-        }
-
-        if(this.getOurIdentity().getName().getCommonName().toUpperCase().contains("DTCC")){
-            partyRole="CLR";
-        }
-
-        this.etfAsset = etfAsset;
     }
 
     @Suspendable
@@ -80,7 +74,7 @@ public class EtfBuyInitiatorFlow extends AbstractIssueFlow {
 
         EtfObligation obligation = createObligation();
 
-     //   final Amount<Currency> amount = new Amount<Currency>(100,Currency.getInstance("GBP")); //TODO obtain amount from RPC
+        //   final Amount<Currency> amount = new Amount<Currency>(100,Currency.getInstance("GBP")); //TODO obtain amount from RPC
 
         final PublicKey ourSigningKey = obligation.getBorrower().getOwningKey();
 
@@ -137,7 +131,7 @@ public class EtfBuyInitiatorFlow extends AbstractIssueFlow {
             final AbstractParty anonymousLender = txKeys.get(toParty);
             final AbstractParty anonymousMe = txKeys.get(getOurIdentity());
 
-            return new EtfObligation(etfAsset , anonymousLender, anonymousMe , new UniqueIdentifier());
+            return new EtfObligation(etfAsset, anonymousLender, anonymousMe, new UniqueIdentifier());
         } else {
             return new EtfObligation(etfAsset, toParty, getOurIdentity(), new UniqueIdentifier());
         }

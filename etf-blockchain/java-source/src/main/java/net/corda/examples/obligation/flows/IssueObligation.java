@@ -33,12 +33,14 @@ public class IssueObligation {
         private final Step BUILDING = new Step("Performing initial steps.");
         private final Step SIGNING = new Step("Signing transaction.");
         private final Step COLLECTING = new Step("Collecting counterparty signature.") {
-            @Override public ProgressTracker childProgressTracker() {
+            @Override
+            public ProgressTracker childProgressTracker() {
                 return CollectSignaturesFlow.Companion.tracker();
             }
         };
         private final Step FINALISING = new Step("Finalising transaction.") {
-            @Override public ProgressTracker childProgressTracker() {
+            @Override
+            public ProgressTracker childProgressTracker() {
                 return FinalityFlow.Companion.tracker();
             }
         };

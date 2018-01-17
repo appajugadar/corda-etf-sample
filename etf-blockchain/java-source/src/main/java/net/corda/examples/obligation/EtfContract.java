@@ -29,23 +29,6 @@ public class EtfContract implements Contract {
 
     public static final String ETF_CASH_SWAP_CONTRACT = "net.corda.examples.obligation.EtfSwapContract"; //This is for DTC
 
-    public interface Commands extends CommandData {
-        class Issue extends TypeOnlyCommandData implements Commands {
-        }
-
-        class BuyProposal extends TypeOnlyCommandData implements Commands {
-        }
-
-        class SellProposal extends TypeOnlyCommandData implements Commands {
-        }
-
-        class Transfer extends TypeOnlyCommandData implements Commands {
-        }
-
-        class Settle extends TypeOnlyCommandData implements Commands {
-        }
-    }
-
     @Override
     public void verify(LedgerTransaction tx) {
         final CommandWithParties<Commands> command = requireSingleCommand(tx.getCommands(), Commands.class);
@@ -94,7 +77,7 @@ public class EtfContract implements Contract {
             req.using("An obligation transfer transaction should only create one output state.", tx.getOutputs().size() == 1);
             EtfObligation input = tx.inputsOfType(EtfObligation.class).get(0);
             EtfObligation output = tx.outputsOfType(EtfObligation.class).get(0);
-           // req.using("Only the lender property may change.", input.withoutLender().equals(output.withoutLender()));
+            // req.using("Only the lender property may change.", input.withoutLender().equals(output.withoutLender()));
             req.using("The lender property must change in a transfer.", !input.getLender().equals(output.getLender()));
             req.using("The borrower, old lender and new lender only must sign an obligation transfer transaction",
                     signers.equals(Sets.union(keysFromParticipants(input), keysFromParticipants(output))));
@@ -148,5 +131,22 @@ public class EtfContract implements Contract {
             req.using("Both lender and borrower together only must sign obligation settle transaction.", signers.equals(keysFromParticipants(inputObligation)));
             return null;
         });
+    }
+
+    public interface Commands extends CommandData {
+        class Issue extends TypeOnlyCommandData implements Commands {
+        }
+
+        class BuyProposal extends TypeOnlyCommandData implements Commands {
+        }
+
+        class SellProposal extends TypeOnlyCommandData implements Commands {
+        }
+
+        class Transfer extends TypeOnlyCommandData implements Commands {
+        }
+
+        class Settle extends TypeOnlyCommandData implements Commands {
+        }
     }
 }

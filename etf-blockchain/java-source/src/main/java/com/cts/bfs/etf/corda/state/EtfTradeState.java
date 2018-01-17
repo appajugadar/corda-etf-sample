@@ -8,20 +8,20 @@ import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.Currency;
 import java.util.List;
 
 public class EtfTradeState implements LinearState {
 
+    private final UniqueIdentifier linearId;
     private Party fromParty;
     private Party toParty;
     private String etfName;
     private Long quantity;
     private Amount<Currency> amount;
     private String tradeType;
-
     private String tradeStatus;
-    private final UniqueIdentifier linearId;
 
     public EtfTradeState(Party fromParty, Party toParty, String etfName, Long quantity, Amount<Currency> amount, String tradeType, UniqueIdentifier linearId) {
         this.fromParty = fromParty;
@@ -94,6 +94,7 @@ public class EtfTradeState implements LinearState {
     public void setTradeStatus(String tradeStatus) {
         this.tradeStatus = tradeStatus;
     }
+
     @NotNull
     @Override
     public List<AbstractParty> getParticipants() {

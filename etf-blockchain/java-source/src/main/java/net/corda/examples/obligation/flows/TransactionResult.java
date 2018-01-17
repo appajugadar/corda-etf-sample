@@ -9,8 +9,8 @@ public class TransactionResult {
     private SignedTransaction stx;
     private AbstractParty recipient;
 
-public TransactionResult(SignedTransaction stx, AbstractParty recipient){
-    this.stx = stx;
-    this.recipient = recipient;
-}
+    public TransactionResult(SignedTransaction stx, AbstractParty recipient) {
+        this.stx = stx;
+        this.recipient = recipient;
+    }
 }

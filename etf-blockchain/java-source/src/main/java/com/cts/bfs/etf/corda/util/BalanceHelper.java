@@ -9,18 +9,18 @@ import java.util.List;
 
 public class BalanceHelper {
 
-   public List<EtfTradeState> getBalance(ServiceHub serviceHub, String type){
-       System.out.print("checking balance for "+type);
+    public List<EtfTradeState> getBalance(ServiceHub serviceHub, String type) {
+        System.out.print("checking balance for " + type);
         List<StateAndRef<EtfTradeState>> etfTradeStatesQueryResp = serviceHub.getVaultService().queryBy(EtfTradeState.class).getStates();
         List<EtfTradeState> etfTradeStates = new ArrayList<>();
         for (StateAndRef<EtfTradeState> stateAndRef : etfTradeStatesQueryResp
                 ) {
             EtfTradeState etfTradeState = stateAndRef.getState().getData();
-            if(etfTradeState.getTradeType().equals(type)){
+            if (etfTradeState.getTradeType().equals(type)) {
                 etfTradeStates.add(stateAndRef.getState().getData());
             }
         }
-       System.out.print("balance for "+type+" is "+etfTradeStates.size());
+        System.out.print("balance for " + type + " is " + etfTradeStates.size());
         return etfTradeStates;
     }
 }

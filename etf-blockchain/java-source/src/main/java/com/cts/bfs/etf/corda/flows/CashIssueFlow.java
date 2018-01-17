@@ -2,9 +2,6 @@ package com.cts.bfs.etf.corda.flows;
 
 import co.paralleluniverse.fibers.Suspendable;
 import com.cts.bfs.etf.corda.contract.CashIssueContract;
-import com.cts.bfs.etf.corda.contract.EtfIssueContract;
-import com.cts.bfs.etf.corda.model.EtfAsset;
-import com.cts.bfs.etf.corda.rest.EtfRestApi;
 import com.cts.bfs.etf.corda.state.EtfTradeState;
 import net.corda.core.contracts.Amount;
 import net.corda.core.contracts.Command;
@@ -16,7 +13,6 @@ import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
-import net.corda.finance.contracts.asset.Cash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,42 +20,37 @@ import java.util.Currency;
 import java.util.stream.Collectors;
 
 import static com.cts.bfs.etf.corda.contract.CashIssueContract.SELF_ISSUE_CASH_CONTRACT_ID;
-import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CONTRACT_ID;
 
 @StartableByRPC
 @InitiatingFlow
 public class CashIssueFlow extends AbstractIssueFlow {
 
     private static final Logger logger = LoggerFactory.getLogger(CashIssueFlow.class);
-
+    private final ProgressTracker.Step INITIALISING = new ProgressTracker.Step("Performing initial steps.");
+    private final ProgressTracker.Step VERIFYING_TRANSACTION = new ProgressTracker.Step("Verifying contract constraints.");
+    private final ProgressTracker.Step BUILDING = new ProgressTracker.Step("Performing initial steps.");
+    private final ProgressTracker.Step SIGNING = new ProgressTracker.Step("Signing transaction.");
+    private final ProgressTracker.Step GATHERING_SIGS = new ProgressTracker.Step("Gathering the counterparty's signature.") {
+        @Override
+        public ProgressTracker childProgressTracker() {
+            return CollectSignaturesFlow.Companion.tracker();
+        }
+    };
+    private final ProgressTracker.Step FINALISING_TRANSACTION = new ProgressTracker.Step("Obtaining notary signature and recording transaction.") {
+        @Override
+        public ProgressTracker childProgressTracker() {
+            return FinalityFlow.Companion.tracker();
+        }
+    };
+    private final ProgressTracker progressTracker = new ProgressTracker(
+            INITIALISING, VERIFYING_TRANSACTION, BUILDING, SIGNING, GATHERING_SIGS, FINALISING_TRANSACTION
+    );
     private Amount<Currency> amount;
 
     public CashIssueFlow(Amount<Currency> amount) {
         super();
         this.amount = amount;
-     }
-
-    private final ProgressTracker.Step INITIALISING = new ProgressTracker.Step("Performing initial steps.");
-    private final ProgressTracker.Step VERIFYING_TRANSACTION = new ProgressTracker.Step("Verifying contract constraints.");
-    private final ProgressTracker.Step BUILDING = new ProgressTracker.Step("Performing initial steps.");
-    private final ProgressTracker.Step SIGNING = new ProgressTracker.Step("Signing transaction.");
-
-    private final ProgressTracker.Step GATHERING_SIGS = new ProgressTracker.Step("Gathering the counterparty's signature.") {
-        @Override public ProgressTracker childProgressTracker() {
-            return CollectSignaturesFlow.Companion.tracker();
-        }
-    };
-
-    private final ProgressTracker.Step FINALISING_TRANSACTION = new ProgressTracker.Step("Obtaining notary signature and recording transaction.") {
-        @Override public ProgressTracker childProgressTracker() {
-            return FinalityFlow.Companion.tracker();
-        }
-    };
-
-    private final ProgressTracker progressTracker = new ProgressTracker(
-            INITIALISING, VERIFYING_TRANSACTION, BUILDING, SIGNING, GATHERING_SIGS, FINALISING_TRANSACTION
-    );
-
+    }
 
     @Override
     public ProgressTracker getProgressTracker() {
@@ -77,10 +68,10 @@ public class CashIssueFlow extends AbstractIssueFlow {
                 getServiceHub().getMyInfo().getLegalIdentities().get(0),
                 null,
                 null,
-                amount, "ISSUECASH" ,
+                amount, "ISSUECASH",
                 new UniqueIdentifier());
 
-        logger.info("etfTradeState -->> "+etfTradeState);
+        logger.info("etfTradeState -->> " + etfTradeState);
 
         final Command<CashIssueContract.Commands.SelfIssueCash> txCommand = new Command<>(new CashIssueContract.Commands.SelfIssueCash(),
                 etfTradeState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
@@ -114,13 +105,13 @@ public class CashIssueFlow extends AbstractIssueFlow {
         progressTracker.setCurrentStep(FINALISING_TRANSACTION);
 
         // Notarise and record the transaction in both parties' vaults.
-        SignedTransaction notarisedTx =  subFlow(new FinalityFlow(partSignedTx));
+        SignedTransaction notarisedTx = subFlow(new FinalityFlow(partSignedTx));
         getLogger().info("Notarised TX");
         return notarisedTx;
     }
 
     @InitiatedBy(CashIssueFlow.class)
-      public static class Acceptor extends FlowLogic<SignedTransaction> {
+    public static class Acceptor extends FlowLogic<SignedTransaction> {
 
         private final FlowSession otherPartyFlow;
 

@@ -1,18 +1,9 @@
 package com.cts.bfs.etf.corda.flows;
 
-import java.util.Currency;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.cts.bfs.etf.corda.contract.EtfIssueContract;
-import com.cts.bfs.etf.corda.model.EtfTradeRequest;
-import com.cts.bfs.etf.corda.model.EtfTradeResponse;
-import com.cts.bfs.etf.corda.state.EtfTradeState;
-import com.cts.bfs.etf.corda.util.BalanceHelper;
-import com.cts.bfs.etf.corda.util.SerilazationHelper;
-
 import co.paralleluniverse.fibers.Suspendable;
-import net.corda.core.contracts.Amount;
+import com.cts.bfs.etf.corda.contract.EtfIssueContract;
+import com.cts.bfs.etf.corda.state.EtfTradeState;
+import com.cts.bfs.etf.corda.util.SerilazationHelper;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndContract;
 import net.corda.core.flows.*;
@@ -21,6 +12,8 @@ import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.UntrustworthyData;
+
+import java.util.stream.Collectors;
 
 import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CONTRACT_ID;
 
@@ -44,9 +37,9 @@ public class DepositorySellEtfFlow extends AbstractDepositoryFlow {
         UntrustworthyData<EtfTradeState> inputFromCustodian = flowSession.receive(EtfTradeState.class); // Input is Cash
         EtfTradeState etfTradeStateCashInput = SerilazationHelper.getEtfTradeState(inputFromCustodian);
         etfTradeStateCashInput.setTradeStatus("UNMATCHED");
-        System.out.println("DepositoryBuyEtfFlow got input from custodian "+etfTradeStateCashInput);
+        System.out.println("DepositoryBuyEtfFlow got input from custodian " + etfTradeStateCashInput);
 
-        if(etfTradeBuyRequests.size()>0){
+        if (etfTradeBuyRequests.size() > 0) {
             EtfTradeState etfSellState = (EtfTradeState) etfTradeBuyRequests.toArray()[0];
             etfTradeStateCashInput.setTradeStatus("MATCHED");
             etfTradeStateCashInput.setEtfName(etfSellState.getEtfName());
@@ -56,7 +49,7 @@ public class DepositorySellEtfFlow extends AbstractDepositoryFlow {
             //	persistEtfTradeStateToVault(etfSellState);
             System.out.println("Sending back response to custodian as match found in vault");
             flowSession.send(etfSellState);
-        }else{
+        } else {
             //wait to receive from seller flow
             etfTradeBuyRequests.add(etfTradeStateCashInput);
             UntrustworthyData<EtfTradeState> responseFromDepositorySellFlow = flowSession.receive(EtfTradeState.class);
@@ -76,7 +69,7 @@ public class DepositorySellEtfFlow extends AbstractDepositoryFlow {
         final TransactionBuilder txBuilder = new TransactionBuilder(notary)
                 .withItems(new StateAndContract(etfTradeStateCashInput, SELF_ISSUE_ETF_CONTRACT_ID), txCommand);
         final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
-        return  subFlow(new FinalityFlow(partSignedTx));
+        return subFlow(new FinalityFlow(partSignedTx));
     }
 
 }

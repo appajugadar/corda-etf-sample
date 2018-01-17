@@ -10,12 +10,12 @@ import net.corda.examples.obligation.EtfAsset;
 class EtfIssueRequest {
 
     EtfAsset etfAsset;
-    OpaqueBytes issueRef ;
+    OpaqueBytes issueRef;
     Party notary;
 
     public EtfIssueRequest(EtfAsset etfAsset,
-            OpaqueBytes issueRef ,
-            Party notary) {
+                           OpaqueBytes issueRef,
+                           Party notary) {
         super();
         this.etfAsset = etfAsset;
         this.issueRef = issueRef;

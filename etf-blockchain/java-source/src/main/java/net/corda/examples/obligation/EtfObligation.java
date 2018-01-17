@@ -13,6 +13,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
 import static net.corda.core.utilities.EncodingUtils.toBase58String;
 
 @CordaSerializable
@@ -95,6 +96,7 @@ public class EtfObligation implements LinearState {
                 this.linearId
         );
     }
+
     public List<PublicKey> getParticipantKeys() {
         return getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList());
     }
@@ -128,10 +130,10 @@ public class EtfObligation implements LinearState {
         }
         EtfObligation other = (EtfObligation) obj;
 
-        if(amount==null && etfAsset==null) return false;
+        if (amount == null && etfAsset == null) return false;
 
-        boolean amountEq = (amount!=null) ? (amount.equals(other.getAmount())):true;
-        boolean etfAssetEq = (etfAsset!=null) ? etfAsset.equals(other.getEtfAsset()):true;
+        boolean amountEq = (amount != null) ? (amount.equals(other.getAmount())) : true;
+        boolean etfAssetEq = (etfAsset != null) ? etfAsset.equals(other.getEtfAsset()) : true;
 
         return amountEq
                 && lender.equals(other.getLender())

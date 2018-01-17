@@ -5,11 +5,11 @@ import net.corda.core.serialization.CordaSerializable;
 @CordaSerializable
 public class EtfTradeRequest {
 
-	private String toPartyName;
-	private String etfName;
-	private Long quantity;
-	private Long amount;
-	private TradeType tradeType;
+    private String toPartyName;
+    private String etfName;
+    private Long quantity;
+    private Long amount;
+    private TradeType tradeType;
 
     public EtfTradeRequest(String toPartyName, String etfName, Long quantity, Long amount, TradeType tradeType) {
         this.toPartyName = toPartyName;

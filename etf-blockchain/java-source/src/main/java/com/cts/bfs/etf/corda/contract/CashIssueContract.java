@@ -9,6 +9,12 @@ public class CashIssueContract implements Contract {
 
     public static final String SELF_ISSUE_CASH_CONTRACT_ID = "com.cts.bfs.etf.corda.contract.CashIssueContract";
 
+    @Override
+    public void verify(LedgerTransaction tx) {
+        System.out.println("Inside contract. inputs " + tx.getInputs());
+        System.out.println("Inside contract. outputs " + tx.getOutputs());
+    }
+
     public interface Commands extends CommandData {
 
         class SelfIssueCash extends TypeOnlyCommandData implements CashIssueContract.Commands {
@@ -16,12 +22,6 @@ public class CashIssueContract implements Contract {
         }
 
 
-    }
-
-    @Override
-    public void verify(LedgerTransaction tx) {
-        System.out.println("Inside contract. inputs "+tx.getInputs());
-        System.out.println("Inside contract. outputs "+tx.getOutputs());
     }
 
 

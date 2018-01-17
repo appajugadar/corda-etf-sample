@@ -8,12 +8,11 @@ public class EtfBalanceResponse {
 
     String etfName;
     String quantity;
+    List<EtfTradeState> etfTradeStates;
 
     public EtfBalanceResponse(List<EtfTradeState> etfTradeStates) {
         this.etfTradeStates = etfTradeStates;
     }
-
-    List<EtfTradeState> etfTradeStates;
 
     public List<EtfTradeState> getEtfTradeStates() {
         return etfTradeStates;

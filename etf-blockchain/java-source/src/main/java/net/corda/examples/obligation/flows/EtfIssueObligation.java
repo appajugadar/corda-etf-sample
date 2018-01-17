@@ -13,7 +13,6 @@ import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.ProgressTracker.Step;
-
 import net.corda.examples.obligation.EtfAsset;
 import net.corda.examples.obligation.EtfObligation;
 import net.corda.examples.obligation.ObligationContract;
@@ -29,8 +28,10 @@ public class EtfIssueObligation {
     @InitiatingFlow
     @StartableByRPC
     public static class Initiator extends ObligationBaseFlow {
-        private final Amount<Currency> amount;;
-        private final EtfAsset etfAsset;;
+        private final Amount<Currency> amount;
+        ;
+        private final EtfAsset etfAsset;
+        ;
         private final Party lender;
         private final Boolean anonymous;
         private final Boolean isCash;
@@ -39,13 +40,15 @@ public class EtfIssueObligation {
         private final Step BUILDING = new Step("Performing initial steps.");
         private final Step SIGNING = new Step("Signing transaction.");
         private final Step COLLECTING = new Step("Collecting counterparty signature.") {
-            @Override public ProgressTracker childProgressTracker() {
+            @Override
+            public ProgressTracker childProgressTracker() {
                 return CollectSignaturesFlow.Companion.tracker();
             }
         };
 
         private final Step FINALISING = new Step("Finalising transaction.") {
-            @Override public ProgressTracker childProgressTracker() {
+            @Override
+            public ProgressTracker childProgressTracker() {
                 return FinalityFlow.Companion.tracker();
             }
         };
@@ -57,7 +60,7 @@ public class EtfIssueObligation {
         public Initiator(Amount<Currency> amount, Party lender, Boolean anonymous) {
             this.amount = amount;
             this.etfAsset = null;
-            this.isCash= true;
+            this.isCash = true;
             this.lender = lender;
             this.anonymous = anonymous;
         }
@@ -127,17 +130,17 @@ public class EtfIssueObligation {
                 final AnonymousParty anonymousMe = txKeys.get(getOurIdentity());
                 final AnonymousParty anonymousLender = txKeys.get(lender);
 
-                if(isCash){
+                if (isCash) {
                     return new EtfObligation(amount, anonymousLender, anonymousMe, null);
-                }else{
+                } else {
                     return new EtfObligation(etfAsset, anonymousLender, anonymousMe, new UniqueIdentifier());
                 }
 
             } else {
-                if(isCash){
-                    return new EtfObligation(amount, lender ,getOurIdentity(), null);
-                }else{
-                    return new EtfObligation(etfAsset, lender ,getOurIdentity(), new UniqueIdentifier());
+                if (isCash) {
+                    return new EtfObligation(amount, lender, getOurIdentity(), null);
+                } else {
+                    return new EtfObligation(etfAsset, lender, getOurIdentity(), new UniqueIdentifier());
                 }
             }
         }

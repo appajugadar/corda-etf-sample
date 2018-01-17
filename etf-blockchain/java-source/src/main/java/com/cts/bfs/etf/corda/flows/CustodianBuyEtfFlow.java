@@ -1,54 +1,38 @@
 package com.cts.bfs.etf.corda.flows;
 
-import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CONTRACT_ID;
-import static com.cts.bfs.etf.corda.util.SerilazationHelper.getEtfTradeRequest;
-import static com.cts.bfs.etf.corda.util.SerilazationHelper.getEtfTradeState;
-
-import com.cts.bfs.etf.corda.contract.EtfIssueContract;
-import com.cts.bfs.etf.corda.model.EtfTradeRequest;
-import com.cts.bfs.etf.corda.model.EtfTradeResponse;
+import co.paralleluniverse.fibers.Suspendable;
 import com.cts.bfs.etf.corda.state.EtfTradeState;
 import com.cts.bfs.etf.corda.util.IdentityHelper;
-import com.cts.bfs.etf.corda.util.SerilazationHelper;
-
-import co.paralleluniverse.fibers.Suspendable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
-import net.corda.core.contracts.Command;
-import net.corda.core.contracts.StateAndContract;
 import net.corda.core.flows.*;
-import net.corda.core.identity.AbstractParty;
 import net.corda.core.identity.Party;
 import net.corda.core.identity.PartyAndCertificate;
 import net.corda.core.transactions.SignedTransaction;
-import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
 import net.corda.core.utilities.UntrustworthyData;
 
-import java.util.stream.Collectors;
+import static com.cts.bfs.etf.corda.util.SerilazationHelper.getEtfTradeState;
 
 @InitiatedBy(APBuyEtfFLow.class)
 @InitiatingFlow
 public class CustodianBuyEtfFlow extends FlowLogic<String> {
 
-	private String dipositoryName;
+    private String dipositoryName;
 
-	private FlowSession flowSession;
+    private FlowSession flowSession;
 
-	public CustodianBuyEtfFlow(FlowSession flowSession) {
-		this.flowSession = flowSession;
-		this.dipositoryName = "DEPOSITORY";
+    public CustodianBuyEtfFlow(FlowSession flowSession) {
+        this.flowSession = flowSession;
+        this.dipositoryName = "DEPOSITORY";
+        System.out.println("Inside custodian called by " + flowSession.getCounterparty());
+    }
 
-		System.out.println("**Inside custodian called by " + flowSession.getCounterparty());
-	}
+    @Suspendable
+    public String call() throws FlowException {
+        System.out.print("The custodian start " + System.currentTimeMillis());
+        System.out.println("**In call method for custodian flow");
 
-	@Suspendable
-	public String call() throws FlowException {
-		System.out.print("The custodian start " + System.currentTimeMillis());
-		System.out.println("**In call method for custodian flow");
-
-		UntrustworthyData<EtfTradeState> inputFromAP = flowSession.receive(EtfTradeState.class);
-		EtfTradeState etfTradeStateFromAp = getEtfTradeState(inputFromAP);
+        UntrustworthyData<EtfTradeState> inputFromAP = flowSession.receive(EtfTradeState.class);
+        EtfTradeState etfTradeStateFromAp = getEtfTradeState(inputFromAP);
         System.out.println("**In call method for custodian flow");
 
         etfTradeStateFromAp.setFromParty(getServiceHub().getMyInfo().getLegalIdentities().get(0));
@@ -60,7 +44,7 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
         Party myParty = getServiceHub().getMyInfo().getLegalIdentities().get(0);
 
 //
-        UntrustworthyData<EtfTradeState> output = flowSession.sendAndReceive(EtfTradeState.class,etfTradeStateFromAp);
+        UntrustworthyData<EtfTradeState> output = flowSession.sendAndReceive(EtfTradeState.class, etfTradeStateFromAp);
         /*EtfTradeState outputFromDepository = SerilazationHelper.getEtfTradeState(output);
         flowSession.send(outputFromDepository);
 
@@ -76,18 +60,15 @@ public class CustodianBuyEtfFlow extends FlowLogic<String> {
         final SignedTransaction partSignedTx = getServiceHub().signInitialTransaction(txBuilder);
         txBuilder.verify(getServiceHub());
         subFlow(new FinalityFlow(partSignedTx));*/
-        System.out.print("Sending back buyed etf to AP " );
-
-
-
+        System.out.print("Sending back buyed etf to AP ");
         return " BUY-CUSTODIAN-SUCCESS ";
-	}
+    }
 
-	private Party getDipository(String dipositoryName) {
-		Iterable<PartyAndCertificate> partyAndCertificates = this.getServiceHub().getIdentityService()
-				.getAllIdentities();
-		return IdentityHelper.getPartyWithName(partyAndCertificates, dipositoryName);
-	}
+    private Party getDipository(String dipositoryName) {
+        Iterable<PartyAndCertificate> partyAndCertificates = this.getServiceHub().getIdentityService()
+                .getAllIdentities();
+        return IdentityHelper.getPartyWithName(partyAndCertificates, dipositoryName);
+    }
 
 
     protected Party getNotary() {

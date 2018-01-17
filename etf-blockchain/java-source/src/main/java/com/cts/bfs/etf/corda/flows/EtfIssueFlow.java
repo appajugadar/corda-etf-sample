@@ -4,7 +4,6 @@ import co.paralleluniverse.fibers.Suspendable;
 import com.cts.bfs.etf.corda.contract.EtfIssueContract;
 import com.cts.bfs.etf.corda.model.EtfAsset;
 import com.cts.bfs.etf.corda.state.EtfTradeState;
-import com.google.common.collect.Sets;
 import net.corda.core.contracts.Command;
 import net.corda.core.contracts.StateAndContract;
 import net.corda.core.contracts.UniqueIdentifier;
@@ -14,6 +13,7 @@ import net.corda.core.identity.Party;
 import net.corda.core.transactions.SignedTransaction;
 import net.corda.core.transactions.TransactionBuilder;
 import net.corda.core.utilities.ProgressTracker;
+
 import java.util.stream.Collectors;
 
 import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CONTRACT_ID;
@@ -22,32 +22,31 @@ import static com.cts.bfs.etf.corda.contract.EtfIssueContract.SELF_ISSUE_ETF_CON
 @InitiatingFlow
 public class EtfIssueFlow extends AbstractIssueFlow {
 
-    private EtfAsset etfAsset;
-    public EtfIssueFlow(EtfAsset etfAsset) {
-        super();
-        this.etfAsset = etfAsset;
-     }
     private final ProgressTracker.Step INITIALISING = new ProgressTracker.Step("Performing initial steps.");
     private final ProgressTracker.Step VERIFYING_TRANSACTION = new ProgressTracker.Step("Verifying contract constraints.");
     private final ProgressTracker.Step BUILDING = new ProgressTracker.Step("Performing initial steps.");
     private final ProgressTracker.Step SIGNING = new ProgressTracker.Step("Signing transaction.");
-
     private final ProgressTracker.Step GATHERING_SIGS = new ProgressTracker.Step("Gathering the counterparty's signature.") {
-        @Override public ProgressTracker childProgressTracker() {
+        @Override
+        public ProgressTracker childProgressTracker() {
             return CollectSignaturesFlow.Companion.tracker();
         }
     };
-
     private final ProgressTracker.Step FINALISING_TRANSACTION = new ProgressTracker.Step("Obtaining notary signature and recording transaction.") {
-        @Override public ProgressTracker childProgressTracker() {
+        @Override
+        public ProgressTracker childProgressTracker() {
             return FinalityFlow.Companion.tracker();
         }
     };
-
     private final ProgressTracker progressTracker = new ProgressTracker(
             INITIALISING, VERIFYING_TRANSACTION, BUILDING, SIGNING, GATHERING_SIGS, FINALISING_TRANSACTION
     );
+    private EtfAsset etfAsset;
 
+    public EtfIssueFlow(EtfAsset etfAsset) {
+        super();
+        this.etfAsset = etfAsset;
+    }
 
     @Override
     public ProgressTracker getProgressTracker() {
@@ -66,14 +65,13 @@ public class EtfIssueFlow extends AbstractIssueFlow {
                 getServiceHub().getMyInfo().getLegalIdentities().get(0),
                 etfAsset.getEtfName(),
                 etfAsset.getQuantity(),
-                null, "ISSUEETF" ,
+                null, "ISSUEETF",
                 new UniqueIdentifier());
 
 
-        System.out.print("etfTradeState -->> "+etfTradeState);
+        System.out.print("etfTradeState -->> " + etfTradeState);
         final Command<EtfIssueContract.Commands.SelfIssueEtf> txCommand = new Command<>(new EtfIssueContract.Commands.SelfIssueEtf(),
                 etfTradeState.getParticipants().stream().map(AbstractParty::getOwningKey).collect(Collectors.toList()));
-
 
 
         System.out.println("Inside EtfIssue flow BUILDING tx");
@@ -103,7 +101,7 @@ public class EtfIssueFlow extends AbstractIssueFlow {
         // Stage 6. finalise tx;
         progressTracker.setCurrentStep(FINALISING_TRANSACTION);
         // Notarise and record the transaction in both parties' vaults.
-        SignedTransaction notarisedTx =  subFlow(new FinalityFlow(partSignedTx));
+        SignedTransaction notarisedTx = subFlow(new FinalityFlow(partSignedTx));
         getLogger().info("Notarised TX");
         return notarisedTx;
 
@@ -111,7 +109,7 @@ public class EtfIssueFlow extends AbstractIssueFlow {
     }
 
     @InitiatedBy(EtfIssueFlow.class)
-      public static class Acceptor extends FlowLogic<SignedTransaction> {
+    public static class Acceptor extends FlowLogic<SignedTransaction> {
 
         private final FlowSession otherPartyFlow;
 

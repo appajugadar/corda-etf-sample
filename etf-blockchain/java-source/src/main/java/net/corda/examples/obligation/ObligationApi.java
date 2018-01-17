@@ -3,7 +3,6 @@ package net.corda.examples.obligation;
 import com.google.common.collect.ImmutableMap;
 import net.corda.core.contracts.Amount;
 import net.corda.core.contracts.StateAndRef;
-import net.corda.core.contracts.UniqueIdentifier;
 import net.corda.core.identity.Party;
 import net.corda.core.messaging.CordaRPCOps;
 import net.corda.core.messaging.FlowHandle;
